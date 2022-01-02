@@ -1,0 +1,69 @@
+{
+  "Name": "Squeezebox",
+  "Description": "Simple actions to control a local Squeezebox server",
+  "Version": "0.1",
+  "Author": "Stefan Zörner",
+  "SDKVersion": 2,
+
+  "Category": "Squeezebox",
+  "CategoryIcon": "images/Category",
+  "Icon": "images/Category",
+  "PropertyInspectorPath": "index_pi.html",
+
+  "CodePath": "streamdeck-squeezebox",
+  "URL": "",
+
+  "Actions": [
+    {
+      "Name": "Check Configuration",
+      "Icon": "images/ConfigureAction",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.configure",
+      "States": [
+        {
+          "Image": "images/ConfigureKey"
+        }
+      ]
+    },
+    {
+      "Name": "Play",
+      "Icon": "images/PlayAction",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.play",
+      "States": [{
+        "Image": "images/PauseKey"
+      }]
+    },
+    {
+      "Name": "Pause",
+      "Icon": "images/PauseAction",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.pause",
+      "States": [{
+        "Image": "images/PlayKey"
+      }]
+    },
+    {
+      "Name": "Play Toggle",
+      "Icon": "images/PlayToggleAction",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.playtoggle",
+      "States": [
+        {
+          "Image": "images/PlayKey"
+        }
+      ]
+    }
+  ],
+
+  "OS": [
+    {
+        "Platform": "mac",
+        "MinimumVersion" : "10.11"
+    }
+  ],
+  "Software":
+    {
+        "MinimumVersion" : "4.1"
+    }
+}
