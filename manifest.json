@@ -31,7 +31,7 @@
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.play",
       "States": [{
-        "Image": "images/PauseKey"
+        "Image": "images/PlayKey"
       }]
     },
     {
@@ -40,7 +40,7 @@
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.pause",
       "States": [{
-        "Image": "images/PlayKey"
+        "Image": "images/PauseKey"
       }]
     },
     {

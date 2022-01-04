@@ -50,9 +50,21 @@ func setup(client *streamdeck.Client) {
 		return nil
 	})
 
+
 	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		squeezebox.TogglePlayerStatus(player)
+		logEvent(client, event)
+
+		status, err := squeezebox.TogglePlayerStatus(player)
+		if err != nil {
+			client.ShowAlert(ctx)
+			logError(client, "playtoggle", err)
+			return err
+		}
+
+		client.LogMessage("New status: "+status)
+		// TODO: Change Key Image
+
 		return nil
 	})
 
