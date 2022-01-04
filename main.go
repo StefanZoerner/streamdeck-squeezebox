@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 )
 
 const player = "00:04:20:22:c2:54"
@@ -47,19 +49,19 @@ func setup(client *streamdeck.Client) {
 
 	playaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.play")
 	playaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		SetPlayerStatus(player, "play")
+		squeezebox.SetPlayerStatus(player, "play")
 		return nil
 	})
 
 	pauseaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.pause")
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		SetPlayerStatus(player, "pause")
+		squeezebox.SetPlayerStatus(player, "pause")
 		return nil
 	})
 
 	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		TogglePlayerStatus(player)
+		squeezebox.TogglePlayerStatus(player)
 		return nil
 	})
 
@@ -103,7 +105,8 @@ func setup(client *streamdeck.Client) {
 			return err
 		}
 
-		err = CheckConnectionToPlayer(settings.Hostname, settings.Port, settings.PlayerId)
+		err = squeezebox.CheckConnectionToPlayer(settings.Hostname, settings.Port, settings.PlayerId)
+
 		if (err != nil) {
 			LogError(client, "configure", err)
 			client.ShowAlert(ctx)

@@ -1,4 +1,4 @@
-package main
+package squeezebox
 
 import (
 	"errors"
@@ -119,6 +119,31 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 	return nil
 }
 
+func GetCurrentArtworkUrl(hostname string, port int, player_id string) (string, error) {
+	connection_string := fmt.Sprintf("%s:%d", hostname, port)
+
+	con, err := net.Dial("tcp", connection_string)
+	if err != nil {
+		return "", err
+	}
+
+	defer con.Close()
+	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id);
+	_, err = con.Write([]byte(cmd))
+	if err != nil {
+		return "", err
+	}
+
+	reply := make([]byte, 1024)
+	_, err = con.Read(reply)
+	if err != nil {
+		return "", err
+	}
+
+	s_reply := string(reply)
+	return s_reply, nil
+}
+
 
 func checkErr(err error) {
 	if err != nil {
@@ -126,13 +151,12 @@ func checkErr(err error) {
 	}
 }
 
-/*
+
 func main () {
-	err := CheckConnectionToPlayer("elfman", 9090, "00:04:20:22:c2:54")
+	url, err := GetCurrentArtworkUrl("elfman", 9090, "00:04:20:22:c2:54")
 	if (err != nil) {
 		fmt.Println("Fehler: " + err.Error())
 	} else {
-		fmt.Println("OK")
+		fmt.Println("URL: " + url)
 	}
 }
-*/
