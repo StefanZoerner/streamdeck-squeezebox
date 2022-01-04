@@ -46,7 +46,15 @@ func setup(client *streamdeck.Client) {
 
 	pauseaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.pause")
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		squeezebox.SetPlayerStatus(player, "pause")
+		logEvent(client, event)
+
+		err := squeezebox.SetPlayerStatus(player, "pause")
+		if (err != nil) {
+			logError(client, "pause", err)
+			client.ShowAlert(ctx)
+			return err
+		}
+
 		return nil
 	})
 
@@ -63,15 +71,48 @@ func setup(client *streamdeck.Client) {
 		}
 
 		client.LogMessage("New status: "+status)
-		// TODO: Change Key Image
+		if status == "play" {
+			image, err := getImageByFilename("./images/PauseKey.png")
+			if (err != nil) {
+				logError(client, "pause", err)
+			} else {
+				client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
+			}
+		} else if status == "stop" || status == "pause" {
+			image, err := getImageByFilename("./images/PlayKey.png")
+			if (err != nil) {
+				logError(client, "pause", err)
+			} else {
+				client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
+			}
+		}
+
 
 		return nil
 	})
 
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		p := streamdeck.WillAppearPayload{}
-		if err := json.Unmarshal(event.Payload, &p); err != nil {
-			return err
+		logEvent(client, event)
+
+		status, err := squeezebox.GetPlayerStatus(player)
+		if (err != nil) {
+			logError(client, "pause", err)
+		} else {
+			if status == "play" {
+				image, err := getImageByFilename("./images/PauseKey.png")
+				if (err != nil) {
+					logError(client, "pause", err)
+				} else {
+					client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
+				}
+			} else if status == "stop" || status == "pause" {
+				image, err := getImageByFilename("./images/PlayKey.png")
+				if (err != nil) {
+					logError(client, "pause", err)
+				} else {
+					client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
+				}
+			}
 		}
 
 		return nil

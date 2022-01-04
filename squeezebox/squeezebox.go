@@ -26,6 +26,38 @@ func SetPlayerStatus(player_id string, status string) error {
 	return err
 }
 
+func GetPlayerStatus(player_id string) (string, error) {
+
+	connection_string := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connection_string)
+	if err != nil {
+		return "", err
+	}
+	defer con.Close()
+
+	cmd := fmt.Sprintf("%s mode ?\n", player_id);
+    replyString, err := performCommand(con, cmd)
+    if err != nil {
+        return "", err
+    }
+
+    result := ""
+	replyString = strings.ReplaceAll(replyString, "\n", "");
+
+    parts := strings.Split(replyString, " ")
+    current_mode := parts[2]
+    if strings.Count(current_mode, "play") == 1 {
+    	result = "play"
+    } else if strings.Count(current_mode, "pause") == 1 {
+        result = "pause"
+    } else if strings.Count(current_mode, "stop") == 1 {
+        result = "stop"
+    }
+
+    return result, err
+}
+
+
 func TogglePlayerStatus(player_id string) (string, error) {
 
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
