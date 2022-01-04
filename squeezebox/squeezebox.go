@@ -11,80 +11,58 @@ import (
 const hostname = "elfman"
 const port = 9090
 
-func SetPlayerStatus(id string, status string) {
+func SetPlayerStatus(player_id string, status string) error {
 
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-
 	con, err := net.Dial("tcp", connection_string)
-	checkErr(err)
+	if err != nil {
+		return err
+	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mode %s\n", id, status);
-	_, err = con.Write([]byte(cmd))
-	checkErr(err)
+	cmd := fmt.Sprintf("%s mode %s\n", player_id, status);
+	_, err = performCommand(con, cmd)
 
-	reply := make([]byte, 1024)
-	_, err = con.Read(reply)
-	checkErr(err)
-
-	fmt.Println(string(reply))
+	return err
 }
 
-func TogglePlayerStatus(id string) {
+func TogglePlayerStatus(player_id string) (string, error) {
 
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-
 	con, err := net.Dial("tcp", connection_string)
-	checkErr(err)
+	if err != nil {
+		return "", err
+	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mode ?\n", id);
-	_, err = con.Write([]byte(cmd))
-	checkErr(err)
+	cmd := fmt.Sprintf("%s mode ?\n", player_id);
+	replyString, err := performCommand(con, cmd)
+	if err != nil {
+		return "", err
+	}
 
-	reply := make([]byte, 1024)
-	_, err = con.Read(reply)
-	checkErr(err)
-
-	replyString := string(reply[:])
 	replyString = strings.ReplaceAll(replyString, "\n", "");
-
-	fmt.Printf("[%s]\n", replyString);
 
 	parts := strings.Split(replyString, " ")
 	current_mode := parts[2]
-
-	fmt.Printf("current player mode: [%s]\n", current_mode);
-	fmt.Println(strings.Count(current_mode, "play"));
-
-
 	if strings.Count(current_mode, "play") == 1 {
-
-		fmt.Println("play ->  pause")
-
-		cmd := fmt.Sprintf("%s mode %s\n", id, "pause");
-		_, err = con.Write([]byte(cmd))
-		checkErr(err)
-
-		reply = make([]byte, 1024)
-		_, err = con.Read(reply)
-		checkErr(err)
-
-		fmt.Println(string(reply))
+		cmd := fmt.Sprintf("%s mode %s\n", player_id, "pause");
+		_, err = performCommand(con, cmd)
+		if err != nil {
+			return "", err
+		}
+		return "pause", nil
 	} else if strings.Count(current_mode, "pause") == 1 || strings.Count(current_mode, "stop") == 1 {
-		fmt.Println("pause/stop -> play")
-
-		cmd := fmt.Sprintf("%s mode %s\n", id, "play");
-		_, err = con.Write([]byte(cmd))
-		checkErr(err)
-
-		reply = make([]byte, 1024)
-		_, err = con.Read(reply)
-		checkErr(err)
-
-		fmt.Println(string(reply))
+		cmd := fmt.Sprintf("%s mode %s\n", player_id, "play");
+		_, err = performCommand(con, cmd)
+		if err != nil {
+			return "", err
+		}
+		return "play", nil
 	}
+	return "", nil
 }
+
 
 func CheckConnectionToPlayer(hostname string, port int, player_id string) error {
 
