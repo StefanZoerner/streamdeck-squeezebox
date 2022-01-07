@@ -33,6 +33,9 @@ func Run(ctx context.Context) error {
 	client := streamdeck.NewClient(ctx, params)
 	setup(client)
 
+	setupVolumeActions(client)
+
+
 	return client.Run()
 }
 
@@ -40,7 +43,30 @@ func setup(client *streamdeck.Client) {
 
 	playaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.play")
 	playaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		squeezebox.SetPlayerStatus(player, "play")
+		logEvent(client, event)
+
+		squeezebox.SetPlayerMode(player, "play")
+
+		settings := Settings{
+			Hostname: "GlobalHostname",
+			Port:     99,
+			PlayerId: "GlobalPlayerId",
+		}
+		client.SetGlobalSettings(ctx, settings)
+
+		return nil
+	})
+
+	playaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+		logEvent(client, event)
+
+		client.GetGlobalSettings(ctx)
+
+		return nil
+	})
+
+	playaction.RegisterHandler(streamdeck.DidReceiveGlobalSettings, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+		logEvent(client, event)
 		return nil
 	})
 
@@ -48,7 +74,7 @@ func setup(client *streamdeck.Client) {
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
-		err := squeezebox.SetPlayerStatus(player, "pause")
+		err := squeezebox.SetPlayerMode(player, "pause")
 		if (err != nil) {
 			logError(client, "pause", err)
 			client.ShowAlert(ctx)
@@ -63,7 +89,7 @@ func setup(client *streamdeck.Client) {
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
-		status, err := squeezebox.TogglePlayerStatus(player)
+		status, err := squeezebox.TogglePlayerMode(player)
 		if err != nil {
 			client.ShowAlert(ctx)
 			logError(client, "playtoggle", err)
@@ -94,7 +120,7 @@ func setup(client *streamdeck.Client) {
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
-		status, err := squeezebox.GetPlayerStatus(player)
+		status, err := squeezebox.GetPlayerMode(player)
 		if (err != nil) {
 			logError(client, "pause", err)
 		} else {

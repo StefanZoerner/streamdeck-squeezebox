@@ -53,7 +53,31 @@
           "Image": "images/PlayKey"
         }
       ]
+    },
+    {
+      "Name": "Volume Up",
+      "Icon": "images/actions/volume_up",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.volumeup",
+      "States": [
+        {
+          "Image": "images/keys/volume_up"
+        }
+      ]
+    },
+    {
+      "Name": "Volume Down",
+      "Icon": "images/actions/volume_down",
+      "SupportedInMultiActions": false,
+      "UUID": "de.szoerner.streamdeck.squeezebox.actions.volumedown",
+      "States": [
+        {
+          "Image": "images/keys/volume_down"
+        }
+      ]
     }
+
+
   ],
 
   "OS": [
