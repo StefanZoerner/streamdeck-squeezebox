@@ -74,7 +74,7 @@ func setup(client *streamdeck.Client) {
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
-		err := squeezebox.SetPlayerMode(player, "pause")
+		_, err := squeezebox.SetPlayerMode(player, "pause")
 		if (err != nil) {
 			logError(client, "pause", err)
 			client.ShowAlert(ctx)

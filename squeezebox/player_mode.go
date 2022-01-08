@@ -3,26 +3,20 @@ package squeezebox
 import (
 	"fmt"
 	"net"
-	"strings"
 )
 
-func SetPlayerMode(player_id string, mode string) error {
-
+func SetPlayerMode(player_id string, mode string) (string, error) {
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
 	con, err := net.Dial("tcp", connection_string)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mode %s\n", player_id, mode);
-	_, err = performCommand(con, cmd)
-
-	return err
+	return setPlayerModeConn(con, player_id, mode)
 }
 
 func GetPlayerMode(player_id string) (string, error) {
-
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
 	con, err := net.Dial("tcp", connection_string)
 	if err != nil {
@@ -30,18 +24,8 @@ func GetPlayerMode(player_id string) (string, error) {
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mode ?\n", player_id);
-	s, err := performCommand(con, cmd)
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Printf("[%s]\n", s)
-
-	tokens := strings.Split(s, " ")
-	return  tokens[2], nil
+	return getPlayerModeConn(con, player_id)
 }
-
 
 func TogglePlayerMode(player_id string) (string, error) {
 
@@ -52,28 +36,41 @@ func TogglePlayerMode(player_id string) (string, error) {
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mode ?", player_id);
-	replyString, err := performCommand(con, cmd)
+	current_mode, err := getPlayerModeConn(con, player_id)
 	if err != nil {
 		return "", err
 	}
 
-	parts := strings.Split(replyString, " ")
-	current_mode := parts[2]
-	if strings.Count(current_mode, "play") == 1 {
-		cmd := fmt.Sprintf("%s mode %s\n", player_id, "pause");
-		_, err = performCommand(con, cmd)
-		if err != nil {
-			return "", err
-		}
-		return "pause", nil
-	} else if strings.Count(current_mode, "pause") == 1 || strings.Count(current_mode, "stop") == 1 {
-		cmd := fmt.Sprintf("%s mode %s\n", player_id, "play");
-		_, err = performCommand(con, cmd)
-		if err != nil {
-			return "", err
-		}
-		return "play", nil
+	switch current_mode {
+	case "play":
+		return setPlayerModeConn(con, player_id, "pause")
+	case "pause", "stop":
+		return setPlayerModeConn(con, player_id, "play")
+	default:
+		return current_mode, nil
 	}
 	return "", nil
+}
+
+
+func getPlayerModeConn(con net.Conn, player_id string) (string, error) {
+
+	cmd := fmt.Sprintf("%s mode ?", player_id);
+	s, err := performCommand(con, cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return getTokenFromResponseLineAndDecode(s, 2)
+}
+
+func setPlayerModeConn(con net.Conn, player_id string, mode string) (string, error) {
+
+	cmd := fmt.Sprintf("%s mode %s\n", player_id, mode);
+	s, err := performCommand(con, cmd)
+	if err != nil {
+		return "", err
+	}
+
+	return getTokenFromResponseLineAndDecode(s, 2)
 }

@@ -1,7 +1,10 @@
 package squeezebox
 
 import (
+	"errors"
+	"fmt"
 	"net"
+	"net/url"
 	"strings"
 )
 
@@ -35,4 +38,18 @@ func performCommand(connection net.Conn, command string) (string, error) {
 	}
 
 	return response, nil
+}
+
+func getTokenFromResponseLineAndDecode(response_line string, n int) (string, error) {
+	tokens := strings.Split(response_line, " ")
+	if (len(tokens) < n) {
+		return "", errors.New(fmt.Sprintf("no token %d in response", n))
+	} else {
+		decoded, err := url.QueryUnescape(tokens[n])
+		if err != nil {
+			return "", err
+		}
+
+		return decoded, nil
+	}
 }
