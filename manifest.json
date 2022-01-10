@@ -8,7 +8,6 @@
   "Category": "Squeezebox",
   "CategoryIcon": "images/Category",
   "Icon": "images/Category",
-  "PropertyInspectorPath": "index_pi.html",
 
   "CodePath": "streamdeck-squeezebox",
   "URL": "",
@@ -48,6 +47,7 @@
       "Icon": "images/PlayToggleAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.playtoggle",
+      "PropertyInspectorPath": "html/player_selection.html",
       "States": [
         {
           "Image": "images/PlayKey"
@@ -59,6 +59,7 @@
       "Icon": "images/actions/volume_up",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.volumeup",
+      "PropertyInspectorPath": "html/player_selection.html",
       "States": [
         {
           "Image": "images/keys/volume_up"
@@ -70,6 +71,7 @@
       "Icon": "images/actions/volume_down",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.volumedown",
+      "PropertyInspectorPath": "html/player_selection.html",
       "States": [
         {
           "Image": "images/keys/volume_down"

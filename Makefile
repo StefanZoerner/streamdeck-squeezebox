@@ -17,7 +17,7 @@ sdplugin: build
 	mkdir -p $(SDPLUGINDIR)
 	cp manifest.json $(SDPLUGINDIR)
 	cp -r images $(SDPLUGINDIR)
-	cp -r css $(SDPLUGINDIR)
+	cp -r html $(SDPLUGINDIR)
 	cp *.html $(SDPLUGINDIR)
 	cp streamdeck-squeezebox $(SDPLUGINDIR)
 

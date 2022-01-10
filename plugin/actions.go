@@ -34,6 +34,7 @@ func Run(ctx context.Context) error {
 	setup(client)
 
 	setupVolumeActions(client)
+	setupPlaymodeActions(client)
 
 
 	return client.Run()
@@ -85,74 +86,6 @@ func setup(client *streamdeck.Client) {
 	})
 
 
-	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
-	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
-
-		status, err := squeezebox.TogglePlayerMode(player)
-		if err != nil {
-			client.ShowAlert(ctx)
-			logError(client, "playtoggle", err)
-			return err
-		}
-
-		client.LogMessage("New status: "+status)
-		if status == "play" {
-			image, err := getImageByFilename("./images/PauseKey.png")
-			if (err != nil) {
-				logError(client, "pause", err)
-			} else {
-				client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
-			}
-		} else if status == "stop" || status == "pause" {
-			image, err := getImageByFilename("./images/PlayKey.png")
-			if (err != nil) {
-				logError(client, "pause", err)
-			} else {
-				client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
-			}
-		}
-
-
-		return nil
-	})
-
-	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
-
-		status, err := squeezebox.GetPlayerMode(player)
-		if (err != nil) {
-			logError(client, "pause", err)
-		} else {
-			if status == "play" {
-				image, err := getImageByFilename("./images/PauseKey.png")
-				if (err != nil) {
-					logError(client, "pause", err)
-				} else {
-					client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
-				}
-			} else if status == "stop" || status == "pause" {
-				image, err := getImageByFilename("./images/PlayKey.png")
-				if (err != nil) {
-					logError(client, "pause", err)
-				} else {
-					client.SetImage(ctx, image, streamdeck.HardwareAndSoftware);
-				}
-			}
-		}
-
-		return nil
-	})
-
-	playtoggleaction.RegisterHandler(streamdeck.SetSettings, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		return nil
-	})
-
-	playtoggleaction.RegisterHandler(streamdeck.SendToPlugin, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-
-		return nil
-
-	})
 
 	configureaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.configure")
 

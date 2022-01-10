@@ -1,0 +1,177 @@
+<head>
+    <meta charset="utf-8" />
+    <title>Squeezebox</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Player</div>
+            <select class="sdpi-item-value select"
+                    id="player_select"
+                    onchange="pluginRequestSetSelectedPlayer()"
+                    onmouseenter="pluginRequestGetPlayerSelectionOptions()"
+                    >
+            </select>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label"></div>
+            <button class="sdpi-item-value"
+                    id="update_button"
+                    onclick="pluginRequestGetPlayerSelectionOptions()">Update Player List</button>
+        </div>
+
+        <div class="sdpi-item">
+            <details id="message_combo" class="message">
+                <summary id="message_summary"></summary>
+                <h4>Information:</h4>
+                <p></p>
+            </details>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Information</div>
+            <input class="sdpi-item-value" id="debug_info" value="" readonly >
+        </div>
+
+    </div>
+
+    <script>
+        var websocket = null,
+            uuid = null,
+            actionInfo = {},
+
+            player_id = "",
+            player_name = ""
+        ;
+
+        function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+
+            uuid = inPropertyInspectorUUID;
+            actionInfo = JSON.parse(inActionInfo); // cache the info
+            document.getElementById('debug_info').value = inActionInfo;
+
+            player_id   = actionInfo.payload.settings.player_id;
+            player_name = actionInfo.payload.settings.player_name;
+
+            const htmlSelect = document.getElementById('player_select')
+            const option = document.createElement("option");
+            option.text = player_name
+            option.value = player_id
+            htmlSelect.add(option)
+
+            if (player_id === "") {
+                showMessage("info", "Select a player for this action.")
+            }
+
+            websocket = new WebSocket("ws://localhost:" + inPort);
+            websocket.onopen = function() {
+                // WebSocket is connected, register the Property Inspector
+                const json = {
+                    "event": inRegisterEvent,
+                    "uuid": inPropertyInspectorUUID
+                };
+
+                websocket.send(JSON.stringify(json));
+            };
+
+            websocket.onmessage = function (evt) {
+
+                // Received message from Stream Deck plugin
+                var jsonObj = JSON.parse(evt.data);
+                var event = jsonObj['event'];
+
+                if (event === 'sendToPropertyInspector') {
+                    var payload = jsonObj['payload'];
+                    document.getElementById('debug_info').value = "payload: " + payload.players;
+
+                    const htmlSelect = document.getElementById('player_select')
+
+                    // Remove all options from selection
+                    var i, L = htmlSelect.options.length - 1;
+                    for(i = L; i >= 0; i--) {
+                        htmlSelect.remove(i);
+                    }
+
+                    // add current value as first option in the selection
+                    let option = document.createElement("option");
+                    option.text = player_name
+                    option.value = player_id
+                    htmlSelect.add(option)
+
+                    // add all available players as options
+                    var players = payload.players;
+                    for (player of players) {
+                        if (player.player_id != player_id) {
+                            option = document.createElement("option");
+                            option.text = player.player_name
+                            option.value = player.player_id
+                            htmlSelect.add(option)
+                        }
+                    }
+
+                    if (players.length == 0) {
+                        showMessage("caution", "No players available.", "")
+                    } else if (players.length == 1) {
+                        showMessage("info", "1 player available.", "")
+                    } else {
+                        showMessage("info", players.length + " players available.", "")
+                    }
+
+                }
+            };
+        }
+
+        function pluginRequestGetPlayerSelectionOptions() {
+            if (websocket) {
+                const payload = {
+                    "command": "getPlayerSelectionOptions",
+                    "value": ""
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+
+        function pluginRequestSetSelectedPlayer() {
+            if (websocket) {
+
+                clearMessage();
+
+                const htmlSelect = document.getElementById('player_select')
+                player_id = htmlSelect.value
+                player_name = htmlSelect.options[htmlSelect.selectedIndex].text
+
+                const payload = {
+                    "command": "setSelectedPlayer",
+                    "value": htmlSelect.value
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+
+        function showMessage(type, summary, long_information) {
+            document.getElementById('message_combo').setAttribute("class", "message "+type);
+            document.getElementById('message_summary').textContent = summary;
+        }
+
+        function clearMessage() {
+            document.getElementById('message_combo').setAttribute("class", "message");
+            document.getElementById('message_summary').textContent = "";
+        }
+    </script>
+</body>
