@@ -29,6 +29,7 @@
       "Icon": "images/PlayAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.play",
+      "PropertyInspectorPath": "html/player_selection.html",
       "States": [{
         "Image": "images/PlayKey"
       }]
@@ -38,6 +39,7 @@
       "Icon": "images/PauseAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.pause",
+      "PropertyInspectorPath": "html/player_selection.html",
       "States": [{
         "Image": "images/PauseKey"
       }]

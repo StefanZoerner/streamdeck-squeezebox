@@ -22,14 +22,14 @@ func selectPlayerHandlerWillAppear  (ctx context.Context, client *streamdeck.Cli
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if (err != nil) {
-		logError(client, "???", err)
+		logError(client, event, err)
 		return err
 	}
 
 	settings := PlayerSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if (err != nil) {
-		logError(client, "???", err)
+		logError(client, event, err)
 		return err
 	}
 
@@ -37,7 +37,7 @@ func selectPlayerHandlerWillAppear  (ctx context.Context, client *streamdeck.Cli
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if (err != nil) {
-			logError(client, "volumedown", err)
+			logError(client, event, err)
 			return err
 		}
 	}
@@ -52,14 +52,14 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 	fromPI := DataFromPlayerSelectionPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		logError(client, "???", err)
+		logError(client, event, err)
 		return err
 	}
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 		players, err := squeezebox.GetPlayers()
 		if (err != nil) {
-			logError(client, "???", err)
+			logError(client, event, err)
 			return err
 		}
 
@@ -78,7 +78,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if (err != nil) {
-			logError(client, "???", err)
+			logError(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "setSelectedPlayer" {
@@ -86,7 +86,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 		player_id := fromPI.Value
 		pinfo, err := squeezebox.GetPlayerInfo(player_id)
 		if (err != nil) {
-			logError(client, "???", err)
+			logError(client, event, err)
 			return err
 		}
 
@@ -97,7 +97,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 
 		err = client.SetSettings(ctx, np);
 		if (err != nil) {
-			logError(client, "volumedown", err)
+			logError(client, event, err)
 			return err
 		}
 	}

@@ -42,48 +42,7 @@ func Run(ctx context.Context) error {
 
 func setup(client *streamdeck.Client) {
 
-	playaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.play")
-	playaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
 
-		squeezebox.SetPlayerMode(player, "play")
-
-		settings := Settings{
-			Hostname: "GlobalHostname",
-			Port:     99,
-			PlayerId: "GlobalPlayerId",
-		}
-		client.SetGlobalSettings(ctx, settings)
-
-		return nil
-	})
-
-	playaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
-
-		client.GetGlobalSettings(ctx)
-
-		return nil
-	})
-
-	playaction.RegisterHandler(streamdeck.DidReceiveGlobalSettings, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
-		return nil
-	})
-
-	pauseaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.pause")
-	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
-
-		_, err := squeezebox.SetPlayerMode(player, "pause")
-		if (err != nil) {
-			logError(client, "pause", err)
-			client.ShowAlert(ctx)
-			return err
-		}
-
-		return nil
-	})
 
 
 
@@ -97,21 +56,21 @@ func setup(client *streamdeck.Client) {
 		payload := streamdeck.KeyDownPayload{}
 		err := json.Unmarshal(event.Payload, &payload)
 		if (err != nil) {
-			logError(client, "configureaction", err)
+			logError(client, event, err)
 			return err
 		}
 
 		settings := Settings{}
 		err = json.Unmarshal(payload.Settings, &settings)
 		if err != nil {
-			logError(client, "configureaction", err)
+			logError(client, event, err)
 			return err
 		}
 
 		err = squeezebox.CheckConnectionToPlayer(settings.Hostname, settings.Port, settings.PlayerId)
 
 		if (err != nil) {
-			logError(client, "configure", err)
+			logError(client, event, err)
 			client.ShowAlert(ctx)
 		} else {
 			client.ShowOk(ctx)
@@ -126,21 +85,21 @@ func setup(client *streamdeck.Client) {
 		payload := streamdeck.WillAppearPayload{}
 		err := json.Unmarshal(event.Payload, &payload)
 		if (err != nil) {
-			logError(client, "configureaction", err)
+			logError(client, event, err)
 			return err
 		}
 
 		sbox_settings := Settings{}
 		err = json.Unmarshal(payload.Settings, &sbox_settings)
 		if (err != nil) {
-			logError(client, "configureaction", err)
+			logError(client, event, err)
 			return err
 		}
 
 		PreloadSettings(&sbox_settings)
 		err = client.SetSettings(ctx, sbox_settings)
 		if (err != nil) {
-			logError(client, "configureaction", err)
+			logError(client, event, err)
 			return err
 		}
 
@@ -156,7 +115,7 @@ func GetSettingsFromPIHandler(ctx context.Context, client *streamdeck.Client, ev
 	piSettings := PropertyInspectorSettings{}
 	err := json.Unmarshal(event.Payload, &piSettings)
 	if err != nil {
-		logError(client, "configureaction", err)
+		logError(client, event, err)
 		return err
 	} else {
 		newSettings := Settings{}

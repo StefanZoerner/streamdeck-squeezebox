@@ -8,11 +8,6 @@ import (
 	"time"
 )
 
-type PlayerSettings struct {
-	PlayerId   string `json:"player_id"`
-	PlayerName string `json:"player_name"`
-}
-
 func setupVolumeActions(client *streamdeck.Client) {
 
 	// Volume Up
@@ -24,7 +19,7 @@ func setupVolumeActions(client *streamdeck.Client) {
 		volume, err := squeezebox.ChangePlayerVolume(player, +10)
 		if err != nil {
 			client.ShowAlert(ctx)
-			logError(client, "volumeup", err)
+			logError(client, event, err)
 			return err
 		}
 
@@ -45,7 +40,7 @@ func setupVolumeActions(client *streamdeck.Client) {
 		volume, err := squeezebox.ChangePlayerVolume(player, -10)
 		if err != nil {
 			client.ShowAlert(ctx)
-			logError(client, "volumedown", err)
+			logError(client, event, err)
 			return err
 		}
 
