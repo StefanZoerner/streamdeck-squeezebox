@@ -1,0 +1,7 @@
+# github.com/gorilla/websocket v1.4.2
+## explicit
+github.com/gorilla/websocket
+# github.com/samwho/streamdeck v0.0.0-20190725183037-2b866fdcb4a6
+## explicit
+github.com/samwho/streamdeck
+github.com/samwho/streamdeck/context
