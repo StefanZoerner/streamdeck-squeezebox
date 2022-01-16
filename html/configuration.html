@@ -1,0 +1,146 @@
+<head>
+    <meta charset="utf-8" />
+    <title>Squeezebox Configuration</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Hostname</div>
+            <input class="sdpi-item-value" id="hostname" value="">
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">CLI Port</div>
+            <input class="sdpi-item-value" id="cli_port" pattern="\d+" value="">
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label"></div>
+            <button class="sdpi-item-value"
+                    id="test_button"
+                    onclick="sendToPlugin('testConnection')">Test Connection</button>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label"></div>
+            <button class="sdpi-item-value"
+                    id="store_button"
+                    onclick="sendToPlugin('setConnection')">OK</button>
+            <button class="sdpi-item-value"
+                    id="reset_button"
+                    onclick="getGlobalSettings()">Reset</button>
+        </div>
+
+        <div class="sdpi-item">
+            <details id="message_combo" class="message">
+                <summary id="message_summary"></summary>
+                <h4>Information:</h4>
+                <p id="message_content"></p>
+            </details>
+        </div>
+
+
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Information</div>
+            <input class="sdpi-item-value" id="debug_info" value="" readonly >
+        </div>
+
+
+    </div>
+
+    <script>
+        var websocket = null,
+            uuid = null,
+            actionInfo = {},
+
+            hostname = "",
+            cli_port = ""
+        ;
+
+        function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+
+            uuid = inPropertyInspectorUUID;
+            actionInfo = JSON.parse(inActionInfo); // cache the info
+            document.getElementById('debug_info').value = inInfo;
+            websocket = new WebSocket("ws://localhost:" + inPort);
+
+            websocket.onopen = function () {
+                // WebSocket is connected, register the Property Inspector
+                const json = {
+                    "event": inRegisterEvent,
+                    "uuid": inPropertyInspectorUUID
+                };
+
+                websocket.send(JSON.stringify(json));
+                getGlobalSettings();
+            };
+
+            websocket.onmessage = function (evt) {
+                // Received message from Stream Deck plugin
+                var jsonObj = JSON.parse(evt.data);
+                var event = jsonObj['event'];
+
+                if (event === "didReceiveGlobalSettings") {
+                    let payload = jsonObj['payload'];
+                    let settings = payload.settings
+
+                    document.getElementById('hostname').value = settings.hostname;
+                    document.getElementById('cli_port').value = settings.cli_port;
+
+                } else if (event === 'sendToPropertyInspector') {
+                    let payload = jsonObj['payload'];
+                    showMessage(payload.type, payload.summary, payload.content)
+                }
+            };
+
+        }
+
+        function sendToPlugin(command) {
+            if (websocket) {
+
+                const hostname = document.getElementById('hostname').value
+                const cli_port = document.getElementById('cli_port').value
+
+                const payload = {
+                    "command": command,
+                    "hostname": hostname,
+                    "cli_port": cli_port
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+
+
+        function getGlobalSettings() {
+            if (websocket) {
+                websocket.send(JSON.stringify({
+                    "event": "getGlobalSettings",
+                    "context": uuid
+                }));
+            }
+        }
+
+        function showMessage(type, summary, content) {
+            document.getElementById('message_combo').setAttribute("class", "message "+type);
+            document.getElementById('message_summary').textContent = summary;
+            document.getElementById('message_content').textContent = content;
+        }
+
+        function clearMessage() {
+            document.getElementById('message_combo').setAttribute("class", "message");
+            document.getElementById('message_summary').textContent = "";
+            document.getElementById('message_content').textContent = "";
+        }
+
+    </script>
+</body>
