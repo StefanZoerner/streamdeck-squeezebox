@@ -3,9 +3,8 @@ package plugin
 import (
 	"context"
 	"encoding/json"
-	sdcontext "github.com/samwho/streamdeck/context"
-
 	"github.com/samwho/streamdeck"
+	sdcontext "github.com/samwho/streamdeck/context"
 )
 
 // PluginGlobalSettings is stored as a Singleton
@@ -34,8 +33,16 @@ func GetPluginGlobalSettings() *PluginGlobalSettings {
 func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
-	dataFromEvent := PluginGlobalSettings{}
-	if err := json.Unmarshal(event.Payload, &dataFromEvent); err != nil {
+
+
+	payload := streamdeck.DidReceiveGlobalSettingsPayload{}
+	if err := json.Unmarshal(event.Payload, &payload); err != nil {
+		logError(client, event, err)
+		return err
+	}
+
+	settingsFromPayload := PluginGlobalSettings{}
+	if err := json.Unmarshal(payload.Settings, &settingsFromPayload); err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -43,8 +50,8 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 	// Store Global Settings in Server Settings
 	//
 	serverSettings := GetPluginGlobalSettings()
-	serverSettings.Hostname = dataFromEvent.Hostname
-	serverSettings.CliPort = dataFromEvent.CliPort
+	serverSettings.Hostname = settingsFromPayload.Hostname
+	serverSettings.CliPort = settingsFromPayload.CliPort
 
 	return nil
 }
