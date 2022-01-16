@@ -14,10 +14,11 @@
 
   "Actions": [
     {
-      "Name": "Check Configuration",
+      "Name": "Server Configuration",
       "Icon": "images/ConfigureAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.configure",
+      "PropertyInspectorPath": "html/configuration.html",
       "States": [
         {
           "Image": "images/ConfigureKey"
