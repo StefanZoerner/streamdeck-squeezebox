@@ -17,8 +17,13 @@ import (
 )
 
 var (
-	logger = log.New(ioutil.Discard, "streamdeck", log.LstdFlags)
+	logger *log.Logger
 )
+
+func init() {
+	f, _ := ioutil.TempFile("/Users/stefanz/Library/Logs/StreamDeck/", "streamdeck-lib.log")
+	logger = log.New(f, "streamdeck", log.LstdFlags)
+}
 
 func Log() *log.Logger {
 	return logger
@@ -31,17 +36,18 @@ type Client struct {
 	params    RegistrationParams
 	c         *websocket.Conn
 	actions   map[string]*Action
-	handlers  map[string][]EventHandler
+    handlers  map[string][]EventHandler
 	done      chan struct{}
 	sendMutex sync.Mutex
 }
 
 func NewClient(ctx context.Context, params RegistrationParams) *Client {
 	return &Client{
-		ctx:     ctx,
-		params:  params,
-		actions: make(map[string]*Action),
-		done:    make(chan struct{}),
+		ctx:      ctx,
+		params:   params,
+		actions:  make(map[string]*Action),
+		handlers: make(map[string][]EventHandler),
+		done:     make(chan struct{}),
 	}
 }
 func (client *Client) Action(uuid string) *Action {
@@ -202,6 +208,10 @@ func (client *Client) SendToPropertyInspector(ctx context.Context, payload inter
 
 func (client *Client) SendToPlugin(ctx context.Context, payload interface{}) error {
 	return client.send(NewEvent(ctx, SendToPlugin, payload))
+}
+
+func (client *Client) RegisterHandler(eventName string, handler EventHandler) {
+	client.handlers[eventName] = append(client.handlers[eventName], handler)
 }
 
 func (client *Client) Close() error {
