@@ -12,6 +12,7 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 	// Play Toggle
 	//
 	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
+	playtoggleaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
@@ -28,7 +29,8 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 			return err
 		}
 
-		mode, err := squeezebox.TogglePlayerMode(settings.PlayerId)
+		gs := GetPluginGlobalSettings()
+		mode, err := squeezebox.TogglePlayerMode(gs.Hostname, gs.CliPort, settings.PlayerId)
 		if err != nil {
 			client.ShowAlert(ctx)
 		} else {
@@ -55,7 +57,8 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 			return err
 		}
 
-		status, err := squeezebox.GetPlayerMode(settings.PlayerId)
+		gs := GetPluginGlobalSettings();
+		status, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CliPort, settings.PlayerId)
 		if err != nil {
 			logError(client, event, err)
 		} else {
@@ -74,6 +77,7 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 	// Play
 	//
 	playaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.play")
+	playaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	playaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
@@ -83,7 +87,8 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 				client.ShowAlert(ctx)
 				err = errors.New("No player configured")
 			} else {
-				_, err = squeezebox.SetPlayerMode(settings.PlayerId, "play")
+				gs := GetPluginGlobalSettings();
+				_, err = squeezebox.SetPlayerMode(gs.Hostname, gs.CliPort, settings.PlayerId, "play")
 			}
 		}
 
@@ -99,6 +104,7 @@ func setupPlaymodeActions(client *streamdeck.Client) {
     // Pause
     //
 	pauseaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.pause")
+	pauseaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
@@ -108,7 +114,8 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 				client.ShowAlert(ctx)
 				err = errors.New("No player configured")
 			} else {
-				_, err = squeezebox.SetPlayerMode(settings.PlayerId, "pause")
+				globalSettings := GetPluginGlobalSettings()
+				_, err = squeezebox.SetPlayerMode(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, "pause")
 			}
 		}
 
