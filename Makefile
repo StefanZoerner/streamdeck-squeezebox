@@ -10,7 +10,7 @@ windowsexecutable:
 	GOOS=windows GOARCH=amd64 go build -o streamdeck-squeezebox.exe
 
 macexecutable:
-	go build -o streamdeck-squeezebox
+	go build -mod=vendor -o streamdeck-squeezebox
 
 sdplugin: build
 	rm -rf $(SDPLUGINDIR)
