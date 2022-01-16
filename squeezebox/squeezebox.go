@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-const hostname = "elfman"
-const port = 9090
-
-
-
 func CheckConnectionToPlayer(hostname string, port int, player_id string) error {
 
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
@@ -45,6 +40,30 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 
 	return nil
 }
+
+func CheckConnection(hostname string, port int) error {
+
+	connection_string := fmt.Sprintf("%s:%d", hostname, port)
+
+	con, err := net.Dial("tcp", connection_string)
+	if err != nil {
+		return err
+	}
+
+	defer con.Close()
+
+	result, err := performCommand(con, "version ?")
+	if err != nil {
+		return err
+	} else {
+		if ! strings.HasPrefix(result, "version") {
+			return errors.New("Unexpected response from server.")
+		}
+	}
+
+	return nil
+}
+
 
 func GetCurrentArtworkUrl(hostname string, port int, player_id string) (string, error) {
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)

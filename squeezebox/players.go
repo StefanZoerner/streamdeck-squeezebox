@@ -11,7 +11,7 @@ type PlayerInfo struct {
 	Name string
 }
 
-func GetPlayers() ([]PlayerInfo, error) {
+func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
 	con, err := net.Dial("tcp", connection_string)
@@ -68,7 +68,7 @@ func GetPlayers() ([]PlayerInfo, error) {
 	return infos, nil
 }
 
-func GetPlayerInfo(player_id string) (*PlayerInfo, error) {
+func GetPlayerInfo(hostname string, port int, player_id string) (*PlayerInfo, error) {
 	connection_string := fmt.Sprintf("%s:%d", hostname, port)
 	con, err := net.Dial("tcp", connection_string)
 	if err != nil {
