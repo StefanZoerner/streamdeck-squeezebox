@@ -97,19 +97,21 @@
                     }
 
                     // add current value as first option in the selection
-                    let option = document.createElement("option");
-                    option.text = player_name
-                    option.value = player_id
-                    htmlSelect.add(option)
+                    let selectedOption = document.createElement("option");
+                    selectedOption.text = player_name
+                    selectedOption.value = player_id
+                    htmlSelect.add(selectedOption)
 
                     // add all available players as options
                     var players = payload.players;
                     for (player of players) {
                         if (player.player_id != player_id) {
-                            option = document.createElement("option");
+                            let option = document.createElement("option");
                             option.text = player.player_name
                             option.value = player.player_id
                             htmlSelect.add(option)
+                        } else {
+                            selectedOption.text = player.player_name
                         }
                     }
 
