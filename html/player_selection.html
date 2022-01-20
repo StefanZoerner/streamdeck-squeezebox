@@ -12,7 +12,6 @@
             <select class="sdpi-item-value select"
                     id="player_select"
                     onchange="pluginRequestSetSelectedPlayer()"
-                    onmouseenter="pluginRequestGetPlayerSelectionOptions()"
                     >
             </select>
         </div>
@@ -125,6 +124,11 @@
 
                 }
             };
+
+            setTimeout(function (){
+                pluginRequestGetPlayerSelectionOptions();
+            }, 500);
+
         }
 
         function pluginRequestGetPlayerSelectionOptions() {
