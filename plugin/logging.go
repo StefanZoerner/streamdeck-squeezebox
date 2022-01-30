@@ -6,16 +6,16 @@ import (
 )
 
 func logError(client *streamdeck.Client, event streamdeck.Event, err error) {
-	action_name := getActionNameFromEvent(event)
-	client.LogMessage("Error in "+action_name + ": "+err.Error())
+	actionName := getActionNameFromEvent(event)
+	client.LogMessage("Error in "+ actionName + ": "+err.Error())
 }
 
 func logEvent(client *streamdeck.Client, event streamdeck.Event) {
 
 	// Determine last part of dot divided action name
-	action_name := getActionNameFromEvent(event)
+	actionName := getActionNameFromEvent(event)
 
-	msg := action_name + " " + event.Event + " "
+	msg := actionName + " " + event.Event + " "
 	client.LogMessage("Event : " +msg)
 	pl, _ := event.Payload.MarshalJSON()
 
@@ -23,10 +23,10 @@ func logEvent(client *streamdeck.Client, event streamdeck.Event) {
 }
 
 func getActionNameFromEvent(event streamdeck.Event) string {
-	action_name := "???"
-	actionParts := strings.Split(event.Action, ".");
+	actionName := "???"
+	actionParts := strings.Split(event.Action, ".")
 	if len(actionParts) > 0 {
-		action_name = actionParts[len(actionParts)-1]
+		actionName = actionParts[len(actionParts)-1]
 	}
-	return action_name
+	return actionName
 }

@@ -36,8 +36,8 @@ func setupVolumeActions(client *streamdeck.Client) {
 		err := getSettingsFromKeydownEvent(event, &settings)
 		if err == nil {
 			if settings.PlayerId == "" {
-				client.ShowAlert(ctx)
-				err = errors.New("No player configured")
+				_ = client.ShowAlert(ctx)
+				err = errors.New("no player configured")
 			} else {
 
 				globalSettings := GetPluginGlobalSettings()
@@ -50,9 +50,8 @@ func setupVolumeActions(client *streamdeck.Client) {
 				if delta != 0 {
 					volume, err := squeezebox.ChangePlayerVolume(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, delta)
 					if err != nil {
-						client.ShowAlert(ctx)
+						_ = client.ShowAlert(ctx)
 					} else {
-						// go displayTextAsTitleForTwoSeconds(ctx, client, fmt.Sprintf("%d", volume))
 						go displayNumberInKey(ctx,client, volume, settings.Kind)
 					}
 				}
@@ -65,45 +64,43 @@ func setupVolumeActions(client *streamdeck.Client) {
 	volumeAction.RegisterHandler(streamdeck.SendToPlugin, volumeSendToPlugin)
 }
 
-
-func displayTextAsTitleForTwoSeconds (ctx context.Context, client *streamdeck.Client, text string) {
-	client.SetTitle(ctx, text, streamdeck.HardwareAndSoftware)
-	time.Sleep(2 * time.Second)
-	client.SetTitle(ctx, "", streamdeck.HardwareAndSoftware)
-}
-
 func displayNumberInKey (ctx context.Context, client *streamdeck.Client, n int, volume_kind string ) {
 
+	// Display Number in Key
 	img := keyimages.CreateKeyImageWithNumber(n)
 	s, _ := streamdeck.Image(img)
-	client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
+	err := client.SetImage(ctx, s, streamdeck.HardwareAndSoftware); if err != nil {
+		_ = client.LogMessage("Error: " + err.Error())
+	}
 
-	time.Sleep(2 * time.Second)
+	// Wait 2 seconds, see https://gobyexample.com/timers
+	timer := time.NewTimer(2 * time.Second)
+	<-timer.C
 
-	volumeSetKeyImage(ctx, client, volume_kind)
+	// Display "old" Image
+	err = volumeSetKeyImage(ctx, client, volume_kind); if err != nil {
+		_ = client.LogMessage("Error: " + err.Error())
+	}
 }
 
 func volumeActionWillAppear  (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
-	err := json.Unmarshal(event.Payload, &payload)
-	if (err != nil) {
+	err := json.Unmarshal(event.Payload, &payload); if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	settings := VolumeActionSettings{}
-	err = json.Unmarshal(payload.Settings, &settings)
-	if (err != nil) {
+	err = json.Unmarshal(payload.Settings, &settings) ; if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	if settings.PlayerId == "" {
 		settings.PlayerName = "(None)"
-		err = client.SetSettings(ctx, settings)
-		if (err != nil) {
+		err = client.SetSettings(ctx, settings); if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -111,15 +108,13 @@ func volumeActionWillAppear  (ctx context.Context, client *streamdeck.Client, ev
 
 	if settings.Kind == "" {
 		settings.Kind = VOLUME_UP
-		err = client.SetSettings(ctx, settings)
-		if (err != nil) {
+		err = client.SetSettings(ctx, settings); if err != nil {
 			logError(client, event, err)
 			return err
 		}
 	}
 
-	err = volumeSetKeyImage(ctx, client, settings.Kind)
-	if (err != nil) {
+	err = volumeSetKeyImage(ctx, client, settings.Kind); if err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -142,12 +137,12 @@ func volumeSendToPlugin (ctx context.Context, client *streamdeck.Client, event s
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 
-		playerSettings := []PlayerSettings{}
+		var playerSettings []PlayerSettings
 		for _, p := range players {
 			np := PlayerSettings{
 				PlayerId:   p.Id,
@@ -160,21 +155,19 @@ func volumeSendToPlugin (ctx context.Context, client *streamdeck.Client, event s
 			Players: playerSettings,
 		}
 
-		err = client.SendToPropertyInspector(ctx, &payload)
-		if (err != nil) {
+		err = client.SendToPropertyInspector(ctx, &payload); if err != nil {
 			logError(client, event, err)
 			return err
 		}
+
 	} else if fromPI.Command == "sendFormData" {
 
-		err = client.SetSettings(ctx, fromPI.Settings);
-		if (err != nil) {
+		err = client.SetSettings(ctx, fromPI.Settings); if err != nil {
 			logError(client, event, err)
 			return err
 		}
 
-		err = volumeSetKeyImage(ctx, client, fromPI.Settings.Kind)
-		if (err != nil) {
+		err = volumeSetKeyImage(ctx, client, fromPI.Settings.Kind); if err != nil {
 			logError(client, event, err)
 			return err
 		}

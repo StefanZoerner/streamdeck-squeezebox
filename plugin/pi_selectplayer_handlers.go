@@ -59,6 +59,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 	globalSettings := GetPluginGlobalSettings()
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
+
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
 		if (err != nil) {
 			logError(client, event, err)

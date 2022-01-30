@@ -2,9 +2,8 @@ package plugin
 
 import (
 	"context"
-	"os"
-
 	"github.com/samwho/streamdeck"
+	"os"
 )
 
 var pluginUUID string
@@ -28,6 +27,8 @@ func setup(client *streamdeck.Client) {
 	setupConfigurationAction(client)
 	setupVolumeActions(client)
 	setupPlaymodeActions(client)
+	setupTrackActions(client)
+	setupAlbumArtAction(client)
 }
 
 

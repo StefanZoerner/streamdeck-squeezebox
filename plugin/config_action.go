@@ -56,9 +56,11 @@ func setupConfigurationAction(client *streamdeck.Client) {
 		} else if fromPI.Command == "testConnection" {
 
 			hostname := fromPI.Hostname
-			port, _ := strconv.Atoi(fromPI.CliPort)
+			cliPort, _ := strconv.Atoi(fromPI.CliPort)
 
-			error := squeezebox.CheckConnection(hostname, port)
+			conProps := squeezebox.NewConnectionProperties(hostname, 9002, cliPort)
+
+			error := squeezebox.CheckConnectionCli(conProps)
 			if error != nil {
 				client.ShowAlert(ctx)
 

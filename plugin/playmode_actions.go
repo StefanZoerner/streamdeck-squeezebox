@@ -3,6 +3,8 @@ package plugin
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
 )
@@ -17,7 +19,7 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 		logEvent(client, event)
 
 		settings, err := getPlayerSettingsFromKeyDownEvent(event)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -57,7 +59,7 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 			return err
 		}
 
-		gs := GetPluginGlobalSettings();
+		gs := GetPluginGlobalSettings()
 		status, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CliPort, settings.PlayerId)
 		if err != nil {
 			logError(client, event, err)
@@ -67,6 +69,8 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 				logError(client, event, err)
 			}
 		}
+
+		// go updatePlayToggle(ctx, client, settings.PlayerId)
 
 		return nil
 	})
@@ -82,12 +86,12 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 		logEvent(client, event)
 
 		settings, err := getPlayerSettingsFromKeyDownEvent(event)
-		if (err == nil) {
+		if err == nil {
 			if settings.PlayerId == "" {
 				client.ShowAlert(ctx)
 				err = errors.New("No player configured")
 			} else {
-				gs := GetPluginGlobalSettings();
+				gs := GetPluginGlobalSettings()
 				_, err = squeezebox.SetPlayerMode(gs.Hostname, gs.CliPort, settings.PlayerId, "play")
 			}
 		}
@@ -101,15 +105,15 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 	playaction.RegisterHandler(streamdeck.WillAppear, selectPlayerHandlerWillAppear)
 	playaction.RegisterHandler(streamdeck.SendToPlugin, selectPlayerHandlerSendToPlugin)
 
-    // Pause
-    //
+	// Pause
+	//
 	pauseaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.pause")
 	pauseaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	pauseaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		logEvent(client, event)
 
 		settings, err := getPlayerSettingsFromKeyDownEvent(event)
-		if (err == nil) {
+		if err == nil {
 			if settings.PlayerId == "" {
 				client.ShowAlert(ctx)
 				err = errors.New("No player configured")
@@ -133,16 +137,39 @@ func setupPlaymodeActions(client *streamdeck.Client) {
 func setImageForPlayMode(ctx context.Context, client *streamdeck.Client, mode string) error {
 	var err error = nil
 
-	if mode == "play" {
-		image, err := getImageByFilename("./images/PauseKey.png")
-		if err == nil {
-			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
-		}
-	} else if mode == "stop" || mode == "pause" {
-		image, err := getImageByFilename("./images/PlayKey.png")
+	icon := ""
+	switch mode {
+		case "play" :
+			icon = "pause"
+		case "pause", "stop":
+			icon = "play"
+		default:
+			err = errors.New(fmt.Sprintf("Unknown play mode: %s", mode))
+	}
+
+	if err == nil {
+		image, err := keyimages.GetStreamDeckImageForIcon(icon)
 		if err == nil {
 			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 		}
 	}
+
 	return err
 }
+
+/*
+
+func updatePlayToggle(ctx context.Context, client *streamdeck.Client, player_id string) {
+	time.Sleep(5 * time.Second)
+	for {
+		gs := GetPluginGlobalSettings()
+		mode, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CliPort, player_id)
+		if err == nil {
+		setImageForPlayMode(ctx, client, mode)
+		} else {
+			client.LogMessage(err.Error())
+		}
+	}
+}
+
+*/

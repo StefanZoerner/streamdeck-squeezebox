@@ -28,12 +28,8 @@ func GetPluginGlobalSettings() *PluginGlobalSettings {
 	return instance
 }
 
-
-
 func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
-
-
 
 	payload := streamdeck.DidReceiveGlobalSettingsPayload{}
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {

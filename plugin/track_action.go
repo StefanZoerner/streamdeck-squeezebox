@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
@@ -37,8 +36,8 @@ func setupTrackActions(client *streamdeck.Client) {
 		err := getSettingsFromKeydownEvent(event, &settings)
 		if err == nil {
 			if settings.PlayerId == "" {
-				client.ShowAlert(ctx)
-				err = errors.New("No player configured")
+				_ = client.ShowAlert(ctx)
+				err = errors.New("no player configured")
 			} else {
 
 				globalSettings := GetPluginGlobalSettings()
@@ -49,14 +48,10 @@ func setupTrackActions(client *streamdeck.Client) {
 					delta = +1
 				}
 				if delta != 0 {
-					t, n, err := squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, delta);
+					_, _, err := squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, delta)
 					if err != nil {
-						client.ShowAlert(ctx)
-					} else {
-						title := fmt.Sprintf("%d/%d", t, n)
-						go displayTextAsTitleForTwoSeconds(ctx, client, title)
+						_ = client.ShowAlert(ctx)
 					}
-
 				}
 			}
 		}
@@ -84,14 +79,14 @@ func trackActionWillAppear  (ctx context.Context, client *streamdeck.Client, eve
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
-	if (err != nil) {
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	settings := TrackActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
-	if (err != nil) {
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -99,7 +94,7 @@ func trackActionWillAppear  (ctx context.Context, client *streamdeck.Client, eve
 	if settings.PlayerId == "" {
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -108,14 +103,14 @@ func trackActionWillAppear  (ctx context.Context, client *streamdeck.Client, eve
 	if settings.Direction == "" {
 		settings.Direction = TRACK_NEXT
 		err = client.SetSettings(ctx, settings)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 	}
 
 	err = trackSetKeyImage(ctx, client, settings.Direction)
-	if (err != nil) {
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -138,7 +133,7 @@ func trackSendToPlugin (ctx context.Context, client *streamdeck.Client, event st
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -157,20 +152,20 @@ func trackSendToPlugin (ctx context.Context, client *streamdeck.Client, event st
 		}
 
 		err = client.SendToPropertyInspector(ctx, &payload)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "sendFormData" {
 
-		err = client.SetSettings(ctx, fromPI.Settings);
-		if (err != nil) {
+		err = client.SetSettings(ctx, fromPI.Settings)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 
 		err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
