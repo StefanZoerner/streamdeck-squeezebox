@@ -1,6 +1,7 @@
 package keyimages
 
 import (
+	"errors"
 	"fmt"
 	"github.com/samwho/streamdeck"
 	"image"
@@ -11,7 +12,45 @@ const (
 	keyImageFilePath = "./assets/images/keys"
 )
 
+var (
+	keyIconCache   map[string]string
+)
+
+func init() {
+	keyIconCache = make(map[string]string)
+
+	iconNames := []string{
+		"album_art",
+		"pause",
+		"play",
+		"track_prev",
+		"track_next",
+		"volume_up",
+		"volume_down",
+	}
+
+	for _, name := range iconNames {
+		sdImage, err := loadStreamDeckImageForIcon(name); if err != nil {
+			fmt.Println(fmt.Sprintf("icon %s not found, %s", name, err.Error()))
+		} else {
+			keyIconCache[name] = sdImage
+		}
+	}
+}
+
 func GetStreamDeckImageForIcon(iconName string) (string, error)  {
+	var result string = ""
+	var err error
+
+	result, ok := keyIconCache[iconName]
+	if !ok {
+		err = errors.New(fmt.Sprintf("icon %s is unknown", iconName))
+	}
+
+	return result, err
+}
+
+func loadStreamDeckImageForIcon(iconName string) (string, error)  {
 
 	filename := fmt.Sprintf("%s/%s.png", keyImageFilePath, iconName)
 
@@ -33,3 +72,4 @@ func GetStreamDeckImageForIcon(iconName string) (string, error)  {
 
 	return result, nil
 }
+
