@@ -3,7 +3,6 @@ package squeezebox
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 )
@@ -41,68 +40,35 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 	return nil
 }
 
-func CheckConnection(hostname string, port int) error {
+func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, error) {
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
+	url := ""
 
+	connection_string := fmt.Sprintf("%s:%d", cp.Hostname, cp.CliPort)
 	con, err := net.Dial("tcp", connection_string)
 	if err != nil {
-		return err
+		return "", err
 	}
-
 	defer con.Close()
 
-	result, err := performCommand(con, "version ?")
+	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id);
+	response, err := performCommand(con, cmd)
 	if err != nil {
-		return err
+		return "", err
+	}
+
+	fmt.Println(response)
+
+	artwork_url, _ := getTagValueFromResponseLine(response, "artwork_url")
+	if artwork_url != "" {
+		url = artwork_url
 	} else {
-		if ! strings.HasPrefix(result, "version") {
-			return errors.New("Unexpected response from server.")
+		coverid, _ := getTagValueFromResponseLine(response, "coverid")
+		if coverid != "" {
+			// http://elfman:9002/music/1cec6e2c/cover.jpg
+			url = fmt.Sprintf("http://%s:%d/music/%s/cover.jpg", cp.Hostname, cp.HttpPort, coverid)
 		}
 	}
 
-	return nil
-}
-
-
-func GetCurrentArtworkUrl(hostname string, port int, player_id string) (string, error) {
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-
-	con, err := net.Dial("tcp", connection_string)
-	if err != nil {
-		return "", err
-	}
-
-	defer con.Close()
-	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id);
-	_, err = con.Write([]byte(cmd))
-	if err != nil {
-		return "", err
-	}
-
-	reply := make([]byte, 1024)
-	_, err = con.Read(reply)
-	if err != nil {
-		return "", err
-	}
-
-	s_reply := string(reply)
-	return s_reply, nil
-}
-
-
-func checkErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-
-func main () {
-	url, err := GetCurrentArtworkUrl("elfman", 9090, "00:04:20:22:c2:54")
-	if (err != nil) {
-		fmt.Println("Fehler: " + err.Error())
-	} else {
-		fmt.Println("URL: " + url)
-	}
+	return url, err
 }

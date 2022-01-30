@@ -22,7 +22,7 @@ func ChangePlayerVolume(hostname string, cli_port int, player_id string, delta i
 		return 0, err
 	}
 
-	cmd = fmt.Sprintf("%s mixer volume ?\n", player_id, delta);
+	cmd = fmt.Sprintf("%s mixer volume ?\n", player_id);
 	replyString, err := performCommand(con, cmd)
 	if err != nil {
 		return 0, err

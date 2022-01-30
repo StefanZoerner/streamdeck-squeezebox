@@ -61,9 +61,8 @@ func getTagValueFromResponseLine(response_line string, tag_name string) (string,
 	tokens := strings.Split(response_line, " ")
 	for i := 0; i < len(tokens); i++ {
 		decoded, _ := url.QueryUnescape(tokens[i])
-		fmt.Println(decoded)
 		if strings.Contains(decoded,":") {
-			if strings.HasPrefix(decoded, tag_name) {
+			if strings.HasPrefix(decoded, tag_name + ":") {
 				value = decoded[len(tag_name)+1:]
 				break
 			}
