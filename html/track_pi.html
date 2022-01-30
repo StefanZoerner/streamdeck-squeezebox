@@ -1,0 +1,188 @@
+<head>
+    <meta charset="utf-8" />
+    <title>Squeezebox</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Player</div>
+            <select class="sdpi-item-value select"
+                    id="player_select"
+                    onchange="pluginRequestSendFormData()">
+            </select>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Direction</div>
+            <select class="sdpi-item-value select"
+                    id="track_direction_select"
+                    onchange="pluginRequestSendFormData()">
+                <option value="prev">Previous Track</option>
+                <option value="next">Next Track</option>
+            </select>
+        </div>
+
+
+        <div class="sdpi-item">
+            <details id="message_combo" class="message">
+                <summary id="message_summary"></summary>
+                <h4>Information:</h4>
+                <p id="message_content"></p>
+            </details>
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Information</div>
+            <input class="sdpi-item-value" id="debug_info" value="" readonly >
+        </div>
+
+    </div>
+
+    <script src="js/messages.js"></script>
+    <script>
+        let websocket = null,
+            uuid = null,
+            actionInfo = {},
+
+            player_id = "",
+            player_name = ""
+        ;
+
+        function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+
+            uuid = inPropertyInspectorUUID;
+            actionInfo = JSON.parse(inActionInfo); // cache the info
+            document.getElementById('debug_info').value = inActionInfo;
+
+            player_id       = actionInfo.payload.settings.player_id;
+            player_name     = actionInfo.payload.settings.player_name;
+            track_direction = actionInfo.payload.settings.track_direction;
+
+            const playerSelect = document.getElementById('player_select')
+            const option = document.createElement("option");
+            option.text = player_name;
+            option.value = player_id;
+            playerSelect.add(option);
+
+            if (player_id === "") {
+                showMessage("info", "Select a player for this action.");
+            }
+
+            const directionSelect = document.getElementById('track_direction_select');
+            directionSelect.value = track_direction;
+
+            websocket = new WebSocket("ws://localhost:" + inPort);
+            websocket.onopen = function() {
+                // WebSocket is connected, register the Property Inspector
+                const json = {
+                    "event": inRegisterEvent,
+                    "uuid": inPropertyInspectorUUID
+                };
+
+                websocket.send(JSON.stringify(json));
+            };
+
+            websocket.onmessage = function (evt) {
+
+                // Received message from Stream Deck plugin
+                var jsonObj = JSON.parse(evt.data);
+                var event = jsonObj['event'];
+
+                if (event === 'sendToPropertyInspector') {
+                    var payload = jsonObj['payload'];
+                    document.getElementById('debug_info').value = "payload: " + payload.players;
+
+                    const htmlSelect = document.getElementById('player_select')
+
+                    // Remove all options from selection
+                    var i, L = htmlSelect.options.length - 1;
+                    for(i = L; i >= 0; i--) {
+                        htmlSelect.remove(i);
+                    }
+
+                    // add current value as first option in the selection
+                    let selectedOption = document.createElement("option");
+                    selectedOption.text = player_name
+                    selectedOption.value = player_id
+                    htmlSelect.add(selectedOption)
+
+                    // add all available players as options
+                    var players = payload.players;
+                    for (player of players) {
+                        if (player.player_id != player_id) {
+                            let option = document.createElement("option");
+                            option.text = player.player_name
+                            option.value = player.player_id
+                            htmlSelect.add(option)
+                        } else {
+                            selectedOption.text = player.player_name
+                        }
+                    }
+
+                    if (players.length == 0) {
+                        showMessage("caution", "No players available.", "")
+                    } else if (players.length == 1) {
+                        showMessage("info", "1 player available.", "")
+                    } else {
+                        showMessage("info", players.length + " players available.", "")
+                    }
+
+                }
+            };
+
+            setTimeout(function (){
+                pluginRequestGetPlayerSelectionOptions();
+            }, 500);
+
+        }
+
+        function pluginRequestGetPlayerSelectionOptions() {
+            if (websocket) {
+                const payload = {
+                    "command": "getPlayerSelectionOptions",
+                    "settings": {}
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+
+        function pluginRequestSendFormData() {
+            if (websocket) {
+
+                clearMessage();
+
+                const htmlSelect = document.getElementById('player_select');
+                const directionSelect = document.getElementById('track_direction_select');
+
+                player_id = htmlSelect.value;
+                player_name = htmlSelect.options[htmlSelect.selectedIndex].text;
+                track_direction = directionSelect.value;
+
+                const payload = {
+                    "command": "sendFormData",
+                    "settings": {
+                        "player_id": player_id,
+                        "player_name": player_name,
+                        "track_direction": track_direction,
+                    }
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+    </script>
+</body>
