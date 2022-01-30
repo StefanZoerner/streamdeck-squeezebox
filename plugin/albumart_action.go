@@ -152,7 +152,7 @@ func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, event str
 	var err error
 
 	if url == "" {
-		img, err = keyimages.GetImageByFilename("./images/album_art_default.png")
+		img, err = keyimages.GetImageByFilename("./assets/images/album_art_default.png")
 	} else {
 		img, err = keyimages.GetImageByUrl(url)
 	}

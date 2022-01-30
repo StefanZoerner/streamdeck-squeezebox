@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	FontFile = "./fonts/ArtsansC.ttf"
+	FontFile = "./assets/fonts/ArtsansC.ttf"
 )
 
 var (

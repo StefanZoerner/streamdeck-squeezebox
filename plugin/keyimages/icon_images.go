@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	keyImageFilePath = "./images/keys"
+	keyImageFilePath = "./assets/images/keys"
 )
 
 func GetStreamDeckImageForIcon(iconName string) (string, error)  {

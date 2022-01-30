@@ -6,8 +6,8 @@
   "SDKVersion": 2,
 
   "Category": "Squeezebox",
-  "CategoryIcon": "images/Category",
-  "Icon": "images/Category",
+  "CategoryIcon": "assets/images/Category",
+  "Icon": "assets/images/Category",
 
   "CodePath": "streamdeck-squeezebox",
   "URL": "",
@@ -16,85 +16,85 @@
     {
       "Name": "Server Setup",
       "Tooltip": "Configure the connection to your Logitech Media Server",
-      "Icon": "images/actions/setup",
+      "Icon": "assets/images/actions/setup",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.configure",
       "PropertyInspectorPath": "html/configuration.html",
       "States": [
         {
-          "Image": "images/ConfigureKey"
+          "Image": "assets/images/ConfigureKey"
         }
       ]
     },
     {
       "Name": "Volume Control",
       "Tooltip": "Change the volume of a player up or down",
-      "Icon": "images/actions/volume",
+      "Icon": "assets/images/actions/volume",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.volume",
       "PropertyInspectorPath": "html/volume_pi.html",
       "States": [
         {
-          "Image": "images/keys/volume_up"
+          "Image": "assets/images/keys/volume_up"
         }
       ]
     },
     {
       "Name": "Change Track",
       "Tooltip": "Previous or next track in the playlist of a player",
-      "Icon": "images/actions/track",
+      "Icon": "assets/images/actions/track",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.track",
       "PropertyInspectorPath": "html/track_pi.html",
       "States": [
         {
-          "Image": "images/keys/track_next"
+          "Image": "assets/images/keys/track_next"
         }
       ]
     },
     {
       "Name": "Album Art",
       "Tooltip": "Show the cover of an album in a tile",
-      "Icon": "images/actions/album_art",
+      "Icon": "assets/images/actions/album_art",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.albumart",
       "PropertyInspectorPath": "html/albumart_pi.html",
       "States": [
         {
-          "Image": "images/keys/album_art"
+          "Image": "assets/images/keys/album_art"
         }
       ]
     },
 
     {
       "Name": "Play",
-      "Icon": "images/PlayAction",
+      "Icon": "assets/images/PlayAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.play",
       "PropertyInspectorPath": "html/player_selection.html",
       "States": [{
-        "Image": "images/keys/play"
+        "Image": "assets/images/keys/play"
       }]
     },
     {
       "Name": "Pause",
-      "Icon": "images/PauseAction",
+      "Icon": "assets/images/PauseAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.pause",
       "PropertyInspectorPath": "html/player_selection.html",
       "States": [{
-        "Image": "images/keys/pause"
+        "Image": "assets/images/keys/pause"
       }]
     },
     {
       "Name": "Play Toggle",
-      "Icon": "images/PlayToggleAction",
+      "Icon": "assets/images/PlayToggleAction",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.playtoggle",
       "PropertyInspectorPath": "html/player_selection.html",
       "States": [
         {
-          "Image": "images/keys/play"
+          "Image": "assets/images/keys/play"
         }
       ]
     }
