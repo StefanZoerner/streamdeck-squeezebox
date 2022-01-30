@@ -12,13 +12,16 @@ windowsexecutable:
 macexecutable:
 	go build -mod=vendor -o streamdeck-squeezebox
 
+test:
+	go test -v -mod=vendor github.com/StefanZoerner/streamdeck-squeezebox/squeezebox
+
 sdplugin: build
 	rm -rf $(SDPLUGINDIR)
 	mkdir -p $(SDPLUGINDIR)
 	cp manifest.json $(SDPLUGINDIR)
 	cp -r images $(SDPLUGINDIR)
+	cp -r fonts $(SDPLUGINDIR)
 	cp -r html $(SDPLUGINDIR)
-	cp *.html $(SDPLUGINDIR)
 	cp streamdeck-squeezebox $(SDPLUGINDIR)
 
 uninstall:
