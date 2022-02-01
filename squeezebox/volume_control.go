@@ -7,31 +7,31 @@ import (
 	"strings"
 )
 
-func ChangePlayerVolume(hostname string, cli_port int, player_id string, delta int) (int, error) {
+func ChangePlayerVolume(hostname string, cliPort int, playerID string, delta int) (int, error) {
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, cli_port)
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", hostname, cliPort)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return 0, err
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s mixer volume %+d\n", player_id, delta)
+	cmd := fmt.Sprintf("%s mixer volume %+d\n", playerID, delta)
 	_, err = performCommand(con, cmd)
 	if err != nil {
 		return 0, err
 	}
 
-	cmd = fmt.Sprintf("%s mixer volume ?\n", player_id)
+	cmd = fmt.Sprintf("%s mixer volume ?\n", playerID)
 	replyString, err := performCommand(con, cmd)
 	if err != nil {
 		return 0, err
 	}
 
 	parts := strings.Split(replyString, " ")
-	current_volume := parts[3]
+	currentVolume := parts[3]
 
-	volume, err := strconv.Atoi(current_volume)
+	volume, err := strconv.Atoi(currentVolume)
 	if err != nil {
 		return 0, err
 	}
