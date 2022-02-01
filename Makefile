@@ -4,7 +4,11 @@ BUILDDIR = build
 RELEASEDIR = release
 SDPLUGINDIR = "$(BUILDDIR)/$(NAME).sdPlugin"
 
-build: macexecutable
+fmt:
+	go fmt ./...
+.PHONY:fmt
+
+build: fmt macexecutable
 
 windowsexecutable:
 	GOOS=windows GOARCH=amd64 go build -o streamdeck-squeezebox.exe
