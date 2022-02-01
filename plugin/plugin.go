@@ -30,5 +30,3 @@ func setup(client *streamdeck.Client) {
 	setupTrackActions(client)
 	setupAlbumArtAction(client)
 }
-
-

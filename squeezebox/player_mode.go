@@ -55,10 +55,9 @@ func TogglePlayerMode(hostname string, port int, player_id string) (string, erro
 	return "", nil
 }
 
-
 func getPlayerModeConn(con net.Conn, player_id string) (string, error) {
 
-	cmd := fmt.Sprintf("%s mode ?", player_id);
+	cmd := fmt.Sprintf("%s mode ?", player_id)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err
@@ -69,7 +68,7 @@ func getPlayerModeConn(con net.Conn, player_id string) (string, error) {
 
 func setPlayerModeConn(con net.Conn, player_id string, mode string) (string, error) {
 
-	cmd := fmt.Sprintf("%s mode %s\n", player_id, mode);
+	cmd := fmt.Sprintf("%s mode %s\n", player_id, mode)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err

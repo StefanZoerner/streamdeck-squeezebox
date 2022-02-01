@@ -10,14 +10,14 @@ import (
 type ConnectionProperties struct {
 	Hostname string
 	HttpPort int
-	CliPort int
+	CliPort  int
 }
 
 func NewConnectionProperties(hostname string, httpPort, cliPort int) ConnectionProperties {
 	return ConnectionProperties{
 		Hostname: hostname,
 		HttpPort: httpPort,
-		CliPort: cliPort,
+		CliPort:  cliPort,
 	}
 }
 
@@ -34,7 +34,7 @@ func CheckConnectionCli(cp ConnectionProperties) error {
 	if err != nil {
 		return err
 	} else {
-		if ! strings.HasPrefix(result, "version") {
+		if !strings.HasPrefix(result, "version") {
 			return errors.New("Unexpected response from server.")
 		}
 	}

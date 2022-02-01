@@ -139,12 +139,12 @@ func setImageForPlayMode(ctx context.Context, client *streamdeck.Client, mode st
 
 	icon := ""
 	switch mode {
-		case "play" :
-			icon = "pause"
-		case "pause", "stop":
-			icon = "play"
-		default:
-			err = errors.New(fmt.Sprintf("Unknown play mode: %s", mode))
+	case "play":
+		icon = "pause"
+	case "pause", "stop":
+		icon = "play"
+	default:
+		err = errors.New(fmt.Sprintf("Unknown play mode: %s", mode))
 	}
 
 	if err == nil {

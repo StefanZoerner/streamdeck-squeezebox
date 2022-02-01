@@ -2,11 +2,11 @@ package plugin
 
 import (
 	"context"
-	"strconv"
 	"encoding/json"
+	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
 	sdcontext "github.com/samwho/streamdeck/context"
-	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
+	"strconv"
 )
 
 type ConfigurationDataFromPI struct {

@@ -19,15 +19,14 @@ import (
 )
 
 const (
-	ALBUM_ART_1x1   = "1x1"
-	ALBUM_ART_2x2   = "2x2"
-	ALBUM_ART_3x3   = "3x3"
+	ALBUM_ART_1x1 = "1x1"
+	ALBUM_ART_2x2 = "2x2"
+	ALBUM_ART_3x3 = "3x3"
 )
-
 
 const (
 	STREAMDECK_TILE_SIZE = 72
-	STREAMDECK_GAP_SIZE = 19
+	STREAMDECK_GAP_SIZE  = 19
 )
 
 const (
@@ -35,14 +34,13 @@ const (
 )
 
 var (
-	KeyForegroundColor   = color.RGBA{0xd8, 0xd8, 0xd8, 255} // lightgray
-	KeyBackgroundColor = color.RGBA{0x1d, 0x1d, 0x1f, 255}      // darkgray
+	KeyForegroundColor = color.RGBA{0xd8, 0xd8, 0xd8, 255} // lightgray
+	KeyBackgroundColor = color.RGBA{0x1d, 0x1d, 0x1f, 255} // darkgray
 )
 
 var (
 	ttFont *truetype.Font
 )
-
 
 func init() {
 	fontBytes, err := ioutil.ReadFile(FontFile)
@@ -69,7 +67,6 @@ func ResizeAndCropImage(img image.Image, dimension string, tileNumber int) (imag
 	}
 }
 
-
 func resizeAndCropImageFor1x1(img image.Image) (image.Image, error) {
 
 	var imgSize uint = STREAMDECK_TILE_SIZE
@@ -77,7 +74,6 @@ func resizeAndCropImageFor1x1(img image.Image) (image.Image, error) {
 
 	return smallerImg, nil
 }
-
 
 func resizeAndCropImageFor2x2(img image.Image, tileNumber int) (image.Image, error) {
 
@@ -153,8 +149,6 @@ func resizeAndCropImageFor3x3(img image.Image, tileNumber int) (image.Image, err
 	return crop, err
 }
 
-
-
 func CreateKeyImageWithNumber(n int) image.Image {
 
 	keyImage := createImage(72, 72, KeyBackgroundColor)
@@ -175,8 +169,8 @@ func CreateKeyImageWithNumber(n int) image.Image {
 	}
 
 	if n < 0 {
-	    n = 0
-    }
+		n = 0
+	}
 
 	if n < 10 {
 		d.Dot = fixed.P(20, 50)

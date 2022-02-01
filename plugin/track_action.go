@@ -24,7 +24,6 @@ type TrackFromPI struct {
 	Settings TrackActionSettings `json:"settings"`
 }
 
-
 func setupTrackActions(client *streamdeck.Client) {
 	trackAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.track")
 	trackAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
@@ -62,7 +61,7 @@ func setupTrackActions(client *streamdeck.Client) {
 	trackAction.RegisterHandler(streamdeck.SendToPlugin, trackSendToPlugin)
 }
 
-func getSettingsFromKeydownEvent (event streamdeck.Event, settings interface{}) error {
+func getSettingsFromKeydownEvent(event streamdeck.Event, settings interface{}) error {
 	var err error
 
 	payload := streamdeck.KeyDownPayload{}
@@ -74,7 +73,7 @@ func getSettingsFromKeydownEvent (event streamdeck.Event, settings interface{}) 
 	return err
 }
 
-func trackActionWillAppear  (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
@@ -118,7 +117,7 @@ func trackActionWillAppear  (ctx context.Context, client *streamdeck.Client, eve
 	return nil
 }
 
-func trackSendToPlugin (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	fromPI := TrackFromPI{}

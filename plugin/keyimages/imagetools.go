@@ -24,8 +24,6 @@ func GetImageByFilename(filename string) (image.Image, error) {
 	return img, nil
 }
 
-
-
 func createImage(width, height int, c color.Color) image.RGBA {
 	upLeft := image.Point{0, 0}
 	lowRight := image.Point{width, height}

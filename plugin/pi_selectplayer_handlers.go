@@ -12,23 +12,23 @@ type PlayerSelection struct {
 }
 
 type DataFromPlayerSelectionPI struct {
-	Command  string `json:"command"`
-	Value    string `json:"value"`
+	Command string `json:"command"`
+	Value   string `json:"value"`
 }
 
-func selectPlayerHandlerWillAppear  (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
-	if (err != nil) {
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	settings := PlayerSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
-	if (err != nil) {
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -36,7 +36,7 @@ func selectPlayerHandlerWillAppear  (ctx context.Context, client *streamdeck.Cli
 	if settings.PlayerId == "" {
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -45,8 +45,7 @@ func selectPlayerHandlerWillAppear  (ctx context.Context, client *streamdeck.Cli
 	return nil
 }
 
-
-func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func selectPlayerHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	fromPI := DataFromPlayerSelectionPI{}
@@ -61,7 +60,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -80,7 +79,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 		}
 
 		err = client.SendToPropertyInspector(ctx, &payload)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -88,7 +87,7 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 
 		player_id := fromPI.Value
 		pinfo, err := squeezebox.GetPlayerInfo(globalSettings.Hostname, globalSettings.CliPort, player_id)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -98,8 +97,8 @@ func selectPlayerHandlerSendToPlugin (ctx context.Context, client *streamdeck.Cl
 			PlayerName: pinfo.Name,
 		}
 
-		err = client.SetSettings(ctx, np);
-		if (err != nil) {
+		err = client.SetSettings(ctx, np)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}

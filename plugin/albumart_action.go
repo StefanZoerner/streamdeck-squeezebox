@@ -12,15 +12,14 @@ import (
 
 type AlbumArtActionSettings struct {
 	PlayerSettings
-	Dimension string `json:"albumart_dimension"`
-	TileNumber int   `json:"albumart_tile_number"`
+	Dimension  string `json:"albumart_dimension"`
+	TileNumber int    `json:"albumart_tile_number"`
 }
 
 type AlbumArtFromPI struct {
 	Command  string                 `json:"command"`
 	Settings AlbumArtActionSettings `json:"settings"`
 }
-
 
 func setupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
@@ -30,8 +29,7 @@ func setupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, albumArtWillAppear)
 }
 
-
-func albumArtWillAppear (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
@@ -79,17 +77,15 @@ func albumArtWillAppear (ctx context.Context, client *streamdeck.Client, event s
 		return err
 	}
 
-
 	err = showAlbumArtImage(ctx, client, event, url, settings.Dimension, settings.TileNumber)
 	if err != nil {
 		logError(client, event, err)
 	}
 
-
 	return err
 }
 
-func albumArtSendToPlugin (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	fromPI := AlbumArtFromPI{}
@@ -104,7 +100,7 @@ func albumArtSendToPlugin (ctx context.Context, client *streamdeck.Client, event
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
-		if (err != nil) {
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}

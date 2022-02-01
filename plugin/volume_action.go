@@ -52,7 +52,7 @@ func setupVolumeActions(client *streamdeck.Client) {
 					if err != nil {
 						_ = client.ShowAlert(ctx)
 					} else {
-						go displayNumberInKey(ctx,client, volume, settings.Kind)
+						go displayNumberInKey(ctx, client, volume, settings.Kind)
 					}
 				}
 			}
@@ -64,12 +64,13 @@ func setupVolumeActions(client *streamdeck.Client) {
 	volumeAction.RegisterHandler(streamdeck.SendToPlugin, volumeSendToPlugin)
 }
 
-func displayNumberInKey (ctx context.Context, client *streamdeck.Client, n int, volume_kind string ) {
+func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, volume_kind string) {
 
 	// Display Number in Key
 	img := keyimages.CreateKeyImageWithNumber(n)
 	s, _ := streamdeck.Image(img)
-	err := client.SetImage(ctx, s, streamdeck.HardwareAndSoftware); if err != nil {
+	err := client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
+	if err != nil {
 		_ = client.LogMessage("Error: " + err.Error())
 	}
 
@@ -78,29 +79,33 @@ func displayNumberInKey (ctx context.Context, client *streamdeck.Client, n int, 
 	<-timer.C
 
 	// Display "old" Image
-	err = volumeSetKeyImage(ctx, client, volume_kind); if err != nil {
+	err = volumeSetKeyImage(ctx, client, volume_kind)
+	if err != nil {
 		_ = client.LogMessage("Error: " + err.Error())
 	}
 }
 
-func volumeActionWillAppear  (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func volumeActionWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
-	err := json.Unmarshal(event.Payload, &payload); if err != nil {
+	err := json.Unmarshal(event.Payload, &payload)
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	settings := VolumeActionSettings{}
-	err = json.Unmarshal(payload.Settings, &settings) ; if err != nil {
+	err = json.Unmarshal(payload.Settings, &settings)
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
 	if settings.PlayerId == "" {
 		settings.PlayerName = "(None)"
-		err = client.SetSettings(ctx, settings); if err != nil {
+		err = client.SetSettings(ctx, settings)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -108,13 +113,15 @@ func volumeActionWillAppear  (ctx context.Context, client *streamdeck.Client, ev
 
 	if settings.Kind == "" {
 		settings.Kind = VOLUME_UP
-		err = client.SetSettings(ctx, settings); if err != nil {
+		err = client.SetSettings(ctx, settings)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 	}
 
-	err = volumeSetKeyImage(ctx, client, settings.Kind); if err != nil {
+	err = volumeSetKeyImage(ctx, client, settings.Kind)
+	if err != nil {
 		logError(client, event, err)
 		return err
 	}
@@ -122,7 +129,7 @@ func volumeActionWillAppear  (ctx context.Context, client *streamdeck.Client, ev
 	return nil
 }
 
-func volumeSendToPlugin (ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func volumeSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	logEvent(client, event)
 
 	fromPI := VolumeFromPI{}
@@ -155,19 +162,22 @@ func volumeSendToPlugin (ctx context.Context, client *streamdeck.Client, event s
 			Players: playerSettings,
 		}
 
-		err = client.SendToPropertyInspector(ctx, &payload); if err != nil {
+		err = client.SendToPropertyInspector(ctx, &payload)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 
 	} else if fromPI.Command == "sendFormData" {
 
-		err = client.SetSettings(ctx, fromPI.Settings); if err != nil {
+		err = client.SetSettings(ctx, fromPI.Settings)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
 
-		err = volumeSetKeyImage(ctx, client, fromPI.Settings.Kind); if err != nil {
+		err = volumeSetKeyImage(ctx, client, fromPI.Settings.Kind)
+		if err != nil {
 			logError(client, event, err)
 			return err
 		}
@@ -196,4 +206,3 @@ func volumeSetKeyImage(ctx context.Context, client *streamdeck.Client, kind stri
 
 	return err
 }
-

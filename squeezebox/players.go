@@ -7,7 +7,7 @@ import (
 )
 
 type PlayerInfo struct {
-	Id string
+	Id   string
 	Name string
 }
 
@@ -20,7 +20,7 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("player count ?");
+	cmd := fmt.Sprintf("player count ?")
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return nil, err
@@ -36,10 +36,10 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 	}
 
 	infos := []PlayerInfo{}
-	for i := 0; i < n;i++ {
+	for i := 0; i < n; i++ {
 
 		// Get Id for Player i
-		cmd := fmt.Sprintf("player id %d ?", i);
+		cmd := fmt.Sprintf("player id %d ?", i)
 		s, err := performCommand(con, cmd)
 		if err != nil {
 			return nil, err
@@ -50,7 +50,7 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 			return nil, err
 		}
 
-		cmd = fmt.Sprintf("%s name ?", player_id);
+		cmd = fmt.Sprintf("%s name ?", player_id)
 		s, err = performCommand(con, cmd)
 		if err != nil {
 			return nil, err
@@ -61,7 +61,7 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 			return nil, err
 		}
 
-		player := PlayerInfo{ player_id, player_name }
+		player := PlayerInfo{player_id, player_name}
 		infos = append(infos, player)
 	}
 
@@ -76,7 +76,7 @@ func GetPlayerInfo(hostname string, port int, player_id string) (*PlayerInfo, er
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s name ?", player_id);
+	cmd := fmt.Sprintf("%s name ?", player_id)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func GetPlayerInfo(hostname string, port int, player_id string) (*PlayerInfo, er
 		return nil, err
 	}
 
-	playerInfo := PlayerInfo{ player_id, player_name }
+	playerInfo := PlayerInfo{player_id, player_name}
 
 	return &playerInfo, nil
 }

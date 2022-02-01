@@ -13,7 +13,7 @@ const (
 )
 
 var (
-	keyIconCache   map[string]string
+	keyIconCache map[string]string
 )
 
 func init() {
@@ -30,7 +30,8 @@ func init() {
 	}
 
 	for _, name := range iconNames {
-		sdImage, err := loadStreamDeckImageForIcon(name); if err != nil {
+		sdImage, err := loadStreamDeckImageForIcon(name)
+		if err != nil {
 			fmt.Println(fmt.Sprintf("icon %s not found, %s", name, err.Error()))
 		} else {
 			keyIconCache[name] = sdImage
@@ -38,7 +39,7 @@ func init() {
 	}
 }
 
-func GetStreamDeckImageForIcon(iconName string) (string, error)  {
+func GetStreamDeckImageForIcon(iconName string) (string, error) {
 	var result string = ""
 	var err error
 
@@ -50,7 +51,7 @@ func GetStreamDeckImageForIcon(iconName string) (string, error)  {
 	return result, err
 }
 
-func loadStreamDeckImageForIcon(iconName string) (string, error)  {
+func loadStreamDeckImageForIcon(iconName string) (string, error) {
 
 	filename := fmt.Sprintf("%s/%s.png", keyImageFilePath, iconName)
 
@@ -72,4 +73,3 @@ func loadStreamDeckImageForIcon(iconName string) (string, error)  {
 
 	return result, nil
 }
-

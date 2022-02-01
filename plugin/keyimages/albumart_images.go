@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	coverCache   map[string]image.Image
-    lock sync.Mutex
+	coverCache map[string]image.Image
+	lock       sync.Mutex
 )
 
 func init() {
-    coverCache = make(map[string]image.Image)
+	coverCache = make(map[string]image.Image)
 }
 
 func GetImageByUrl(url string) (image.Image, error) {

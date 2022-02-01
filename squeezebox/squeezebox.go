@@ -17,7 +17,7 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 	}
 
 	defer con.Close()
-	cmd := fmt.Sprintf("%s connected ?\n", player_id);
+	cmd := fmt.Sprintf("%s connected ?\n", player_id)
 	_, err = con.Write([]byte(cmd))
 	if err != nil {
 		return err
@@ -31,10 +31,10 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 
 	s_reply := string(reply)
 	s_reply = strings.ReplaceAll(s_reply, "\n", "")
-	result := strings.Split(s_reply," ")[2]
+	result := strings.Split(s_reply, " ")[2]
 
-	if (strings.Contains(result, "%3F")) {
-		return errors.New("Player "+player_id+" not connected to server.")
+	if strings.Contains(result, "%3F") {
+		return errors.New("Player " + player_id + " not connected to server.")
 	}
 
 	return nil
@@ -51,7 +51,7 @@ func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, er
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id);
+	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id)
 	response, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err
