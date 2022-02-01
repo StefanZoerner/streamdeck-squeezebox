@@ -44,7 +44,7 @@ func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, er
 
 	url := ""
 
-	connection_string := fmt.Sprintf("%s:%d", cp.Hostname, cp.CliPort)
+	connection_string := fmt.Sprintf("%s:%d", cp.Hostname, cp.CLIPort)
 	con, err := net.Dial("tcp", connection_string)
 	if err != nil {
 		return "", err
@@ -66,7 +66,7 @@ func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, er
 		coverid, _ := getTagValueFromResponseLine(response, "coverid")
 		if coverid != "" {
 			// http://elfman:9002/music/1cec6e2c/cover.jpg
-			url = fmt.Sprintf("http://%s:%d/music/%s/cover.jpg", cp.Hostname, cp.HttpPort, coverid)
+			url = fmt.Sprintf("http://%s:%d/music/%s/cover.jpg", cp.Hostname, cp.HTTPPort, coverid)
 		}
 	}
 

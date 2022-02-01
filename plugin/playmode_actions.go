@@ -163,7 +163,7 @@ func updatePlayToggle(ctx context.Context, client *streamdeck.Client, player_id 
 	time.Sleep(5 * time.Second)
 	for {
 		gs := GetPluginGlobalSettings()
-		mode, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CliPort, player_id)
+		mode, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CLIPort, player_id)
 		if err == nil {
 		setImageForPlayMode(ctx, client, mode)
 		} else {

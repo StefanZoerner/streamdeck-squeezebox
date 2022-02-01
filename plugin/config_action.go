@@ -60,7 +60,7 @@ func setupConfigurationAction(client *streamdeck.Client) {
 
 			conProps := squeezebox.NewConnectionProperties(hostname, 9002, cliPort)
 
-			error := squeezebox.CheckConnectionCli(conProps)
+			error := squeezebox.CheckConnectionCLI(conProps)
 			if error != nil {
 				client.ShowAlert(ctx)
 
