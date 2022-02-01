@@ -64,7 +64,7 @@ func setupVolumeActions(client *streamdeck.Client) {
 	volumeAction.RegisterHandler(streamdeck.SendToPlugin, volumeSendToPlugin)
 }
 
-func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, volume_kind string) {
+func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, volumeKind string) {
 
 	// Display Number in Key
 	img := keyimages.CreateKeyImageWithNumber(n)
@@ -79,7 +79,7 @@ func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, v
 	<-timer.C
 
 	// Display "old" Image
-	err = volumeSetKeyImage(ctx, client, volume_kind)
+	err = volumeSetKeyImage(ctx, client, volumeKind)
 	if err != nil {
 		_ = client.LogMessage("Error: " + err.Error())
 	}
