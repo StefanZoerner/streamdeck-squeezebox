@@ -71,7 +71,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	// TODO: get From Global Props
 	conProps := squeezebox.NewConnectionProperties("elfman", 9002, 9090)
 
-	url, err := squeezebox.GetCurrentArtworkUrl(conProps, settings.PlayerId)
+	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
 	if err != nil {
 		logError(client, event, err)
 		return err
@@ -108,7 +108,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		playerSettings := []PlayerSettings{}
 		for _, p := range players {
 			np := PlayerSettings{
-				PlayerId:   p.Id,
+				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)

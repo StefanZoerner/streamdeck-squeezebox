@@ -7,17 +7,16 @@ import (
 	"strings"
 )
 
-func CheckConnectionToPlayer(hostname string, port int, player_id string) error {
+func CheckConnectionToPlayer(hostname string, port int, playerID string) error {
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return err
 	}
-
 	defer con.Close()
-	cmd := fmt.Sprintf("%s connected ?\n", player_id)
+
+	cmd := fmt.Sprintf("%s connected ?\n", playerID)
 	_, err = con.Write([]byte(cmd))
 	if err != nil {
 		return err
@@ -29,29 +28,29 @@ func CheckConnectionToPlayer(hostname string, port int, player_id string) error 
 		return err
 	}
 
-	s_reply := string(reply)
-	s_reply = strings.ReplaceAll(s_reply, "\n", "")
-	result := strings.Split(s_reply, " ")[2]
+	sReply := string(reply)
+	sReply = strings.ReplaceAll(sReply, "\n", "")
+	result := strings.Split(sReply, " ")[2]
 
 	if strings.Contains(result, "%3F") {
-		return errors.New("Player " + player_id + " not connected to server.")
+		return errors.New("Player " + playerID + " not connected to server.")
 	}
 
 	return nil
 }
 
-func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, error) {
+func GetCurrentArtworkURL(cp ConnectionProperties, playerID string) (string, error) {
 
 	url := ""
 
-	connection_string := fmt.Sprintf("%s:%d", cp.Hostname, cp.CLIPort)
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", cp.Hostname, cp.CLIPort)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return "", err
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", player_id)
+	cmd := fmt.Sprintf("%s status - 1 tags:K,c\n", playerID)
 	response, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err
@@ -59,9 +58,9 @@ func GetCurrentArtworkUrl(cp ConnectionProperties, player_id string) (string, er
 
 	fmt.Println(response)
 
-	artwork_url, _ := getTagValueFromResponseLine(response, "artwork_url")
-	if artwork_url != "" {
-		url = artwork_url
+	artworkURL, _ := getTagValueFromResponseLine(response, "artworkURL")
+	if artworkURL != "" {
+		url = artworkURL
 	} else {
 		coverid, _ := getTagValueFromResponseLine(response, "coverid")
 		if coverid != "" {

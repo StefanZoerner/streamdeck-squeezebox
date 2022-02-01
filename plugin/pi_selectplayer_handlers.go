@@ -68,7 +68,7 @@ func selectPlayerHandlerSendToPlugin(ctx context.Context, client *streamdeck.Cli
 		playerSettings := []PlayerSettings{}
 		for _, p := range players {
 			np := PlayerSettings{
-				PlayerId:   p.Id,
+				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)

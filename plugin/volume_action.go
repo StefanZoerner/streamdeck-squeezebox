@@ -152,7 +152,7 @@ func volumeSendToPlugin(ctx context.Context, client *streamdeck.Client, event st
 		var playerSettings []PlayerSettings
 		for _, p := range players {
 			np := PlayerSettings{
-				PlayerId:   p.Id,
+				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)

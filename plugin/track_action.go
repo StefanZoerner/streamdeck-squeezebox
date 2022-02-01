@@ -140,7 +140,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 		playerSettings := []PlayerSettings{}
 		for _, p := range players {
 			np := PlayerSettings{
-				PlayerId:   p.Id,
+				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)

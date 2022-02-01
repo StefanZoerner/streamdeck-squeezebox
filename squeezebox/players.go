@@ -7,7 +7,7 @@ import (
 )
 
 type PlayerInfo struct {
-	Id   string
+	ID   string
 	Name string
 }
 
@@ -38,30 +38,30 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 	infos := []PlayerInfo{}
 	for i := 0; i < n; i++ {
 
-		// Get Id for Player i
+		// Get ID for Player i
 		cmd := fmt.Sprintf("player id %d ?", i)
 		s, err := performCommand(con, cmd)
 		if err != nil {
 			return nil, err
 		}
 
-		player_id, err := getTokenFromResponseLineAndDecode(s, 3)
+		playerID, err := getTokenFromResponseLineAndDecode(s, 3)
 		if err != nil {
 			return nil, err
 		}
 
-		cmd = fmt.Sprintf("%s name ?", player_id)
+		cmd = fmt.Sprintf("%s name ?", playerID)
 		s, err = performCommand(con, cmd)
 		if err != nil {
 			return nil, err
 		}
 
-		player_name, err := getTokenFromResponseLineAndDecode(s, 2)
+		playerName, err := getTokenFromResponseLineAndDecode(s, 2)
 		if err != nil {
 			return nil, err
 		}
 
-		player := PlayerInfo{player_id, player_name}
+		player := PlayerInfo{playerID, playerName}
 		infos = append(infos, player)
 	}
 

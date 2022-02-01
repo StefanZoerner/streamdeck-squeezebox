@@ -6,14 +6,14 @@ import (
 	"strconv"
 )
 
-func ChangePlayerTrack(hostname string, cli_port int, player_id string, delta int) (int, int, error) {
+func ChangePlayerTrack(hostname string, cliPort int, playerID string, delta int) (int, int, error) {
 
 	var err error
 	var trackIndex int
 	var trackCount int
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, cli_port)
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", hostname, cliPort)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -21,7 +21,7 @@ func ChangePlayerTrack(hostname string, cli_port int, player_id string, delta in
 
 	// Determine current number of tracks
 	//
-	cmd := fmt.Sprintf("%s playlist tracks ?", player_id)
+	cmd := fmt.Sprintf("%s playlist tracks ?", playerID)
 	resp, err := performCommand(con, cmd)
 	if err == nil {
 		s, err := getTokenFromResponseLineAndDecode(resp, 3)
@@ -38,25 +38,25 @@ func ChangePlayerTrack(hostname string, cli_port int, player_id string, delta in
 	}
 
 	// Determine current track number
-	trackIndex, err = getTrackIndexConn(con, player_id)
+	trackIndex, err = getTrackIndexConn(con, playerID)
 	if err != nil {
 		return 0, 0, err
 	}
 
 	if delta == 1 {
 		if trackCount > trackIndex {
-			cmd := fmt.Sprintf("%s playlist index +1", player_id)
+			cmd := fmt.Sprintf("%s playlist index +1", playerID)
 			_, err = performCommand(con, cmd)
 			if err == nil {
-				trackIndex, err = getTrackIndexConn(con, player_id)
+				trackIndex, err = getTrackIndexConn(con, playerID)
 			}
 		}
 	} else if delta == -1 {
 		if trackIndex > 1 {
-			cmd := fmt.Sprintf("%s playlist index -1", player_id)
+			cmd := fmt.Sprintf("%s playlist index -1", playerID)
 			_, err = performCommand(con, cmd)
 			if err == nil {
-				trackIndex, err = getTrackIndexConn(con, player_id)
+				trackIndex, err = getTrackIndexConn(con, playerID)
 			}
 		}
 	}
@@ -64,12 +64,12 @@ func ChangePlayerTrack(hostname string, cli_port int, player_id string, delta in
 	return trackIndex, trackCount, err
 }
 
-func getTrackIndexConn(con net.Conn, player_id string) (int, error) {
+func getTrackIndexConn(con net.Conn, playerID string) (int, error) {
 
 	var trackIndex = 0
 	var err error = nil
 
-	cmd := fmt.Sprintf("%s playlist index ?", player_id)
+	cmd := fmt.Sprintf("%s playlist index ?", playerID)
 	resp, err := performCommand(con, cmd)
 	if err == nil {
 		s, err := getTokenFromResponseLineAndDecode(resp, 3)
