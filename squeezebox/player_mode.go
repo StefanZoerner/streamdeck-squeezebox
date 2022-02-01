@@ -5,59 +5,64 @@ import (
 	"net"
 )
 
-// SetPlayerMode sets the mode of the player with player_id to mode.
+// SetPlayerMode sets the mode of the player with playerID to mode.
 // Possible values are "play", "pause", "stop".
 // It returns the the mode and any error encountered.
-func SetPlayerMode(hostname string, port int, player_id string, mode string) (string, error) {
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-	con, err := net.Dial("tcp", connection_string)
+func SetPlayerMode(hostname string, port int, playerID string, mode string) (string, error) {
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return "", err
 	}
 	defer con.Close()
 
-	return setPlayerModeConn(con, player_id, mode)
+	return setPlayerModeConn(con, playerID, mode)
 }
 
-func GetPlayerMode(hostname string, port int, player_id string) (string, error) {
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-	con, err := net.Dial("tcp", connection_string)
+// GetPlayerMode retrieves the mode of the player with playerID.
+// Possible values are "play", "pause", "stop".
+// It returns the the mode and any error encountered.
+func GetPlayerMode(hostname string, port int, playerID string) (string, error) {
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return "", err
 	}
 	defer con.Close()
 
-	return getPlayerModeConn(con, player_id)
+	return getPlayerModeConn(con, playerID)
 }
 
-func TogglePlayerMode(hostname string, port int, player_id string) (string, error) {
+// TogglePlayerMode changes the mode of the player with playerID.
+// From play to pause, from stop or pause to play.
+// It returns the new mode and any error encountered.
+func TogglePlayerMode(hostname string, port int, playerID string) (string, error) {
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return "", err
 	}
 	defer con.Close()
 
-	current_mode, err := getPlayerModeConn(con, player_id)
+	currentMode, err := getPlayerModeConn(con, playerID)
 	if err != nil {
 		return "", err
 	}
 
-	switch current_mode {
+	switch currentMode {
 	case "play":
-		return setPlayerModeConn(con, player_id, "pause")
+		return setPlayerModeConn(con, playerID, "pause")
 	case "pause", "stop":
-		return setPlayerModeConn(con, player_id, "play")
+		return setPlayerModeConn(con, playerID, "play")
 	default:
-		return current_mode, nil
+		return currentMode, nil
 	}
-	return "", nil
 }
 
-func getPlayerModeConn(con net.Conn, player_id string) (string, error) {
+func getPlayerModeConn(con net.Conn, playerID string) (string, error) {
 
-	cmd := fmt.Sprintf("%s mode ?", player_id)
+	cmd := fmt.Sprintf("%s mode ?", playerID)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err
@@ -66,9 +71,9 @@ func getPlayerModeConn(con net.Conn, player_id string) (string, error) {
 	return getTokenFromResponseLineAndDecode(s, 2)
 }
 
-func setPlayerModeConn(con net.Conn, player_id string, mode string) (string, error) {
+func setPlayerModeConn(con net.Conn, playerID string, mode string) (string, error) {
 
-	cmd := fmt.Sprintf("%s mode %s\n", player_id, mode)
+	cmd := fmt.Sprintf("%s mode %s\n", playerID, mode)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return "", err
