@@ -129,12 +129,12 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		if err != nil {
 			logError(client, event, err)
 			return err
-		} else {
-			err = showAlbumArtImage(ctx, client, event, "", fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
-			if err != nil {
-				logError(client, event, err)
-				return err
-			}
+		}
+
+		err = showAlbumArtImage(ctx, client, event, "", fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
+		if err != nil {
+			logError(client, event, err)
+			return err
 		}
 
 	}

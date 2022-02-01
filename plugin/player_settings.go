@@ -17,9 +17,9 @@ func getPlayerSettingsFromKeyDownEvent(event streamdeck.Event) (PlayerSettings, 
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
 		return settings, err
-	} else {
-		err = json.Unmarshal(payload.Settings, &settings)
 	}
+
+	err = json.Unmarshal(payload.Settings, &settings)
 
 	return settings, err
 }
@@ -31,9 +31,8 @@ func getPlayerSettingsFromWillAppearEvent(event streamdeck.Event) (PlayerSetting
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
 		return settings, err
-	} else {
-		err = json.Unmarshal(payload.Settings, &settings)
 	}
 
+	err = json.Unmarshal(payload.Settings, &settings)
 	return settings, err
 }
