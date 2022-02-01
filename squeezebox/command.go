@@ -1,7 +1,6 @@
 package squeezebox
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -40,30 +39,30 @@ func performCommand(connection net.Conn, command string) (string, error) {
 	return response, nil
 }
 
-func getTokenFromResponseLineAndDecode(response_line string, n int) (string, error) {
-	tokens := strings.Split(response_line, " ")
+func getTokenFromResponseLineAndDecode(responseLine string, n int) (string, error) {
+	tokens := strings.Split(responseLine, " ")
 	if len(tokens) < n {
-		return "", errors.New(fmt.Sprintf("no token %d in response", n))
-	} else {
-		decoded, err := url.QueryUnescape(tokens[n])
-		if err != nil {
-			return "", err
-		}
-
-		return decoded, nil
+		return "", fmt.Errorf("no token %d in response", n)
 	}
+	decoded, err := url.QueryUnescape(tokens[n])
+	if err != nil {
+		return "", err
+	}
+
+	return decoded, nil
+
 }
 
-func getTagValueFromResponseLine(response_line string, tag_name string) (string, error) {
+func getTagValueFromResponseLine(responseLine string, tagName string) (string, error) {
 	value := ""
 	var err error = nil
 
-	tokens := strings.Split(response_line, " ")
+	tokens := strings.Split(responseLine, " ")
 	for i := 0; i < len(tokens); i++ {
 		decoded, _ := url.QueryUnescape(tokens[i])
 		if strings.Contains(decoded, ":") {
-			if strings.HasPrefix(decoded, tag_name+":") {
-				value = decoded[len(tag_name)+1:]
+			if strings.HasPrefix(decoded, tagName+":") {
+				value = decoded[len(tagName)+1:]
 				break
 			}
 		}

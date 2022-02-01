@@ -13,8 +13,8 @@ type PlayerInfo struct {
 
 func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-	con, err := net.Dial("tcp", connection_string)
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return nil, err
 	}
@@ -68,26 +68,26 @@ func GetPlayers(hostname string, port int) ([]PlayerInfo, error) {
 	return infos, nil
 }
 
-func GetPlayerInfo(hostname string, port int, player_id string) (*PlayerInfo, error) {
-	connection_string := fmt.Sprintf("%s:%d", hostname, port)
-	con, err := net.Dial("tcp", connection_string)
+func GetPlayerInfo(hostname string, port int, playerID string) (*PlayerInfo, error) {
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return nil, err
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("%s name ?", player_id)
+	cmd := fmt.Sprintf("%s name ?", playerID)
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	player_name, err := getTokenFromResponseLineAndDecode(s, 2)
+	playerName, err := getTokenFromResponseLineAndDecode(s, 2)
 	if err != nil {
 		return nil, err
 	}
 
-	playerInfo := PlayerInfo{player_id, player_name}
+	playerInfo := PlayerInfo{playerID, playerName}
 
 	return &playerInfo, nil
 }
