@@ -58,7 +58,7 @@ func GetCurrentArtworkURL(cp ConnectionProperties, playerID string) (string, err
 
 	fmt.Println(response)
 
-	artworkURL, _ := getTagValueFromResponseLine(response, "artworkURL")
+	artworkURL, _ := getTagValueFromResponseLine(response, "artwork_url")
 	if artworkURL != "" {
 		url = artworkURL
 	} else {
