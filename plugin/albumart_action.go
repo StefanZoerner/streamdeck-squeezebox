@@ -3,7 +3,9 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
+	sdcontext "github.com/samwho/streamdeck/context"
 	"image"
 
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
@@ -21,12 +23,38 @@ type AlbumArtFromPI struct {
 	Settings AlbumArtActionSettings `json:"settings"`
 }
 
+type AlbumArtObserver struct {
+	client    *streamdeck.Client
+	ctx       context.Context
+	dimension string
+	tile      int
+}
+
+func (aao AlbumArtObserver) playmodeChanged(_ string) {
+}
+
+func (aao AlbumArtObserver) albumArtChanged(newURL string) {
+	err := showAlbumArtImage(aao.ctx, aao.client, newURL, aao.dimension, aao.tile)
+	if err != nil {
+		logErrorNoEvent(aao.client, err)
+	}
+}
+
+func (aao AlbumArtObserver) getID() string {
+	return sdcontext.Context(aao.ctx)
+}
+
+func (aao AlbumArtObserver) String() string {
+	return "AlbumArtObserver " + aao.getID()[:5] + "..."
+}
+
 func setupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 
 	albumArtAction.RegisterHandler(streamdeck.SendToPlugin, albumArtSendToPlugin)
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, albumArtWillAppear)
+	albumArtAction.RegisterHandler(streamdeck.WillDisappear, albumArtWillDisappear)
 }
 
 func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
@@ -60,6 +88,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		settings.TileNumber = 1
 		modified = true
 	}
+
 	if modified {
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
@@ -68,21 +97,48 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		}
 	}
 
-	// TODO: get From Global Props
-	conProps := squeezebox.NewConnectionProperties("elfman", 9002, 9090)
+	aao := AlbumArtObserver{
+		client:    client,
+		ctx:       ctx,
+		dimension: settings.Dimension,
+		tile:      settings.TileNumber,
+	}
+	count := addOberserverForPlayer(settings.PlayerId, aao)
+	client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, settings.PlayerId, count))
 
+	conProps := GetPluginGlobalSettings().connectionProps()
 	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
 	if err != nil {
 		logError(client, event, err)
 		return err
 	}
 
-	err = showAlbumArtImage(ctx, client, event, url, settings.Dimension, settings.TileNumber)
+	err = showAlbumArtImage(ctx, client, url, settings.Dimension, settings.TileNumber)
 	if err != nil {
 		logError(client, event, err)
 	}
 
 	return err
+}
+
+func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	logEvent(client, event)
+
+	settings, err := getPlayerSettingsFromWillDisappearEvent(event)
+	if err != nil {
+		logError(client, event, err)
+		return err
+	}
+
+	aao := AlbumArtObserver{
+		client: client,
+		ctx:    ctx,
+	}
+	count := removeOberserverForPlayer(settings.PlayerId, aao)
+	client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", aao, settings.PlayerId, count))
+
+	return nil
+
 }
 
 func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
@@ -99,7 +155,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
+		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
 		if err != nil {
 			logError(client, event, err)
 			return err
@@ -131,7 +187,26 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			return err
 		}
 
-		err = showAlbumArtImage(ctx, client, event, "", fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
+		aao := AlbumArtObserver{
+			client:    client,
+			ctx:       ctx,
+			dimension: fromPI.Settings.Dimension,
+			tile:      fromPI.Settings.TileNumber,
+		}
+		removeOberserverForAllPlayers(aao)
+		client.LogMessage(fmt.Sprintf("removed %s for all players", aao))
+
+		count := addOberserverForPlayer(fromPI.Settings.PlayerId, aao)
+		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, fromPI.Settings.PlayerId, count))
+
+		cp := GetPluginGlobalSettings().connectionProps()
+		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
+		if err != nil {
+			logError(client, event, err)
+			return err
+		}
+
+		err = showAlbumArtImage(ctx, client, url, fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
 		if err != nil {
 			logError(client, event, err)
 			return err
@@ -142,7 +217,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 	return nil
 }
 
-func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, event streamdeck.Event, url, dim string, tile int) error {
+func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim string, tile int) error {
 
 	var img image.Image
 	var err error
@@ -154,20 +229,20 @@ func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, event str
 	}
 
 	if err != nil {
-		logError(client, event, err)
+		logErrorNoEvent(client, err)
 		return err
 	}
 
 	tileImage, err := keyimages.ResizeAndCropImage(img, dim, tile)
 	if err != nil {
-		logError(client, event, err)
+		logErrorNoEvent(client, err)
 		return err
 	}
 
 	s, _ := streamdeck.Image(tileImage)
 	err = client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
 	if err != nil {
-		logError(client, event, err)
+		logErrorNoEvent(client, err)
 		return err
 	}
 

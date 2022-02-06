@@ -39,7 +39,7 @@ func setupConfigurationAction(client *streamdeck.Client) {
 
 			newGlobalSettings := PluginGlobalSettings{}
 			newGlobalSettings.Hostname = fromPI.Hostname
-			newGlobalSettings.CliPort, _ = strconv.Atoi(fromPI.CliPort)
+			newGlobalSettings.CLIPort, _ = strconv.Atoi(fromPI.CliPort)
 
 			globalCtx := sdcontext.WithContext(context.Background(), pluginUUID)
 			if err := client.SetGlobalSettings(globalCtx, newGlobalSettings); err != nil {

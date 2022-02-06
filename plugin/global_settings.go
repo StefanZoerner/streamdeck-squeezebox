@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
 	sdcontext "github.com/samwho/streamdeck/context"
 )
@@ -11,16 +12,19 @@ import (
 
 type PluginGlobalSettings struct {
 	Hostname string `json:"hostname"`
-	CliPort  int    `json:"cli_port"`
+	CLIPort  int    `json:"cli_port"`
+	HTTPPort int    `json:"http_port"`
 }
 
 var instance *PluginGlobalSettings
 
 func init() {
 	instance = &PluginGlobalSettings{
+
 		// Default values
 		Hostname: "hostname",
-		CliPort:  9090,
+		CLIPort:  9090,
+		HTTPPort: 9002, // TODO: Modify to 9000
 	}
 }
 
@@ -28,8 +32,18 @@ func GetPluginGlobalSettings() *PluginGlobalSettings {
 	return instance
 }
 
+func (pgs PluginGlobalSettings) connectionProps() squeezebox.ConnectionProperties {
+	cp := squeezebox.ConnectionProperties{
+		Hostname: pgs.Hostname,
+		HTTPPort: pgs.HTTPPort,
+		CLIPort:  pgs.CLIPort,
+	}
+
+	return cp
+}
+
 func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	logEvent(client, event)
+	// logEvent(client, event)
 
 	payload := streamdeck.DidReceiveGlobalSettingsPayload{}
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
@@ -47,19 +61,20 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 	//
 	serverSettings := GetPluginGlobalSettings()
 	serverSettings.Hostname = settingsFromPayload.Hostname
-	serverSettings.CliPort = settingsFromPayload.CliPort
+	serverSettings.CLIPort = settingsFromPayload.CLIPort
+	serverSettings.HTTPPort = settingsFromPayload.HTTPPort
 
 	return nil
 }
 
 func WillAppearRequestGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	logEvent(client, event)
+	// logEvent(client, event)
+	var err error
 
 	global := sdcontext.WithContext(context.Background(), pluginUUID)
-	if err := client.GetGlobalSettings(global); err != nil {
+	if err = client.GetGlobalSettings(global); err != nil {
 		logError(client, event, err)
-		return err
 	}
 
-	return nil
+	return err
 }

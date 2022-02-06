@@ -36,3 +36,16 @@ func getPlayerSettingsFromWillAppearEvent(event streamdeck.Event) (PlayerSetting
 	err = json.Unmarshal(payload.Settings, &settings)
 	return settings, err
 }
+
+func getPlayerSettingsFromWillDisappearEvent(event streamdeck.Event) (PlayerSettings, error) {
+	settings := PlayerSettings{}
+
+	payload := streamdeck.WillDisappearPayload{}
+	err := json.Unmarshal(event.Payload, &payload)
+	if err != nil {
+		return settings, err
+	}
+
+	err = json.Unmarshal(payload.Settings, &settings)
+	return settings, err
+}

@@ -4,10 +4,13 @@ BUILDDIR = build
 RELEASEDIR = release
 SDPLUGINDIR = "$(BUILDDIR)/$(NAME).sdPlugin"
 
+.DEFAULT_GOAL := install
+
+.PHONY:fmt
 fmt:
 	go fmt ./...
-.PHONY:fmt
 
+.PHONY:build
 build: fmt macexecutable
 
 windowsexecutable:

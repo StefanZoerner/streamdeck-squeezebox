@@ -47,7 +47,7 @@ func setupTrackActions(client *streamdeck.Client) {
 					delta = +1
 				}
 				if delta != 0 {
-					_, _, err := squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, delta)
+					_, _, err := squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CLIPort, settings.PlayerId, delta)
 					if err != nil {
 						_ = client.ShowAlert(ctx)
 					}
@@ -131,7 +131,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
+		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
 		if err != nil {
 			logError(client, event, err)
 			return err

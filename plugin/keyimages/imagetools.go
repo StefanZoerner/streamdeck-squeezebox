@@ -8,6 +8,16 @@ import (
 	"os"
 )
 
+const (
+	StreamdeckTileSize = 72
+	StreamdeckGapSize  = 19
+)
+
+var (
+	KeyForegroundColor = color.RGBA{0xd8, 0xd8, 0xd8, 255} // lightgray
+	KeyBackgroundColor = color.RGBA{0x1d, 0x1d, 0x1f, 255} // darkgray
+)
+
 func GetImageByFilename(filename string) (image.Image, error) {
 
 	infile, err := os.Open(filename)

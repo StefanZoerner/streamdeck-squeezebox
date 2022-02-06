@@ -48,7 +48,7 @@ func setupVolumeActions(client *streamdeck.Client) {
 					delta = +10
 				}
 				if delta != 0 {
-					volume, err := squeezebox.ChangePlayerVolume(globalSettings.Hostname, globalSettings.CliPort, settings.PlayerId, delta)
+					volume, err := squeezebox.ChangePlayerVolume(globalSettings.Hostname, globalSettings.CLIPort, settings.PlayerId, delta)
 					if err != nil {
 						_ = client.ShowAlert(ctx)
 					} else {
@@ -143,7 +143,7 @@ func volumeSendToPlugin(ctx context.Context, client *streamdeck.Client, event st
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CliPort)
+		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
 		if err != nil {
 			logError(client, event, err)
 			return err

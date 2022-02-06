@@ -10,6 +10,10 @@ func logError(client *streamdeck.Client, event streamdeck.Event, err error) {
 	client.LogMessage("Error in " + actionName + ": " + err.Error())
 }
 
+func logErrorNoEvent(client *streamdeck.Client, err error) {
+	client.LogMessage("Error: " + err.Error())
+}
+
 func logEvent(client *streamdeck.Client, event streamdeck.Event) {
 
 	// Determine last part of dot divided action name

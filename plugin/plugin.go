@@ -20,6 +20,8 @@ func Run(ctx context.Context) error {
 	client.RegisterHandler(streamdeck.DidReceiveGlobalSettings, DidReceiveGlobalSettingsHandler)
 	setup(client)
 
+	go startTicker()
+
 	return client.Run()
 }
 
