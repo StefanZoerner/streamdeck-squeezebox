@@ -63,14 +63,14 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := AlbumArtActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -81,7 +81,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		modified = true
 	}
 	if settings.Dimension == "" {
-		settings.Dimension = keyimages.ALBUM_ART_1x1
+		settings.Dimension = keyimages.AlbumArt1x1
 		modified = true
 	}
 	if settings.TileNumber == 0 {
@@ -92,7 +92,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	if modified {
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 	}
@@ -109,13 +109,13 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	conProps := GetPluginGlobalSettings().connectionProps()
 	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
 	err = showAlbumArtImage(ctx, client, url, settings.Dimension, settings.TileNumber)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 	}
 
 	return err
@@ -126,7 +126,7 @@ func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event
 
 	settings, err := getPlayerSettingsFromWillDisappearEvent(event)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -147,7 +147,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 	fromPI := AlbumArtFromPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -157,7 +157,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -176,14 +176,14 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "sendFormData" {
 
 		err = client.SetSettings(ctx, fromPI.Settings)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -202,13 +202,13 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		cp := GetPluginGlobalSettings().connectionProps()
 		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
 		err = showAlbumArtImage(ctx, client, url, fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -219,32 +219,34 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim string, tile int) error {
 
+	client.LogMessage(fmt.Sprintf("showAlbumArtImage %s tile %d: %s", dim, tile, url))
+
 	var img image.Image
 	var err error
 
-	if url == "" {
-		img, err = keyimages.GetImageByFilename("./assets/images/album_art_default.png")
-	} else {
-		img, err = keyimages.GetImageByUrl(url)
-	}
-
+	img, err = keyimages.GetImageByUrl(url)
 	if err != nil {
 		logErrorNoEvent(client, err)
-		return err
 	}
 
-	tileImage, err := keyimages.ResizeAndCropImage(img, dim, tile)
-	if err != nil {
-		logErrorNoEvent(client, err)
-		return err
+	// Ignore error (if any)  and try to render (default) image, if availaible
+	if img != nil {
+		client.LogMessage(fmt.Sprintf("IMG =  %s ", img.Bounds()))
+		client.LogMessage(fmt.Sprintf("ResizeAndCropImage %s tile %d", dim, tile))
+
+		tileImage, err := keyimages.ResizeAndCropImage(img, dim, tile)
+		if err != nil {
+			logErrorNoEvent(client, err)
+			return err
+		}
+
+		s, _ := streamdeck.Image(tileImage)
+		err = client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
+		if err != nil {
+			logErrorNoEvent(client, err)
+			return err
+		}
 	}
 
-	s, _ := streamdeck.Image(tileImage)
-	err = client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
-	if err != nil {
-		logErrorNoEvent(client, err)
-		return err
-	}
-
-	return nil
+	return err
 }
