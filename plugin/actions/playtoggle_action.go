@@ -133,60 +133,52 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	fromPI := DataFromPlayerSelectionPI{}
-	err := json.Unmarshal(event.Payload, &fromPI)
+	err = json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
-	globalSettings := general.GetPluginGlobalSettings()
-
 	if fromPI.Command == "getPlayerSelectionOptions" {
+		var payload PlayerSelection
 
-		payload, err := getPlayerSelection()
+		payload, err = getPlayerSelection()
 		if err == nil {
 			err = client.SendToPropertyInspector(ctx, &payload)
 		}
-
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
 	} else if fromPI.Command == "setSelectedPlayer" {
+
+		playerID := fromPI.Value
 
 		pmo := PlayModeObserver{
 			client: client,
 			ctx:    ctx,
 		}
 		general.RemoveOberserverForAllPlayers(pmo)
-		client.LogMessage(fmt.Sprintf("remove PlayerObserver for all players"))
+		general.AddOberserverForPlayer(playerID, pmo)
 
-		playerID := fromPI.Value
-		count := general.AddOberserverForPlayer(playerID, pmo)
-		client.LogMessage(fmt.Sprintf("add PlayerObserver for player %s, now %d", playerID, count))
-
+		globalSettings := general.GetPluginGlobalSettings()
 		conProps := globalSettings.ConnectionProps()
+		var pinfo *squeezebox.PlayerInfo
 
-		pinfo, err := squeezebox.GetPlayerInfo(conProps, playerID)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
-		np := PlayerSettings{
-			PlayerId:   playerID,
-			PlayerName: pinfo.Name,
-		}
-
-		err = client.SetSettings(ctx, np)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+		pinfo, err = squeezebox.GetPlayerInfo(conProps, playerID)
+		if err == nil {
+			np := PlayerSettings{
+				PlayerId:   playerID,
+				PlayerName: pinfo.Name,
+			}
+			err = client.SetSettings(ctx, np)
 		}
 	}
 
-	return nil
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+	}
+
+	return err
 }
 
 func setImageForPlayMode(ctx context.Context, client *streamdeck.Client, mode string) error {
