@@ -22,15 +22,12 @@ func GetCurrentArtworkURL(cp ConnectionProperties, playerID string) (string, err
 		return "", err
 	}
 
-	fmt.Println(response)
-
 	artworkURL, _ := getTagValueFromResponseLine(response, "artwork_url")
 	if artworkURL != "" {
 		url = artworkURL
 	} else {
 		coverid, _ := getTagValueFromResponseLine(response, "coverid")
 		if coverid != "" {
-			// http://elfman:9002/music/1cec6e2c/cover.jpg
 			url = fmt.Sprintf("http://%s:%d/music/%s/cover.jpg", cp.Hostname, cp.HTTPPort, coverid)
 		}
 	}
