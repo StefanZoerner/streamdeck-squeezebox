@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
@@ -17,7 +18,7 @@ const (
 )
 
 type VolumeActionSettings struct {
-	PlayerSettings
+	actions.PlayerSettings
 	Kind string `json:"volume_kind"`
 }
 
@@ -152,16 +153,16 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 			return err
 		}
 
-		var playerSettings []PlayerSettings
+		var playerSettings []actions.PlayerSettings
 		for _, p := range players {
-			np := PlayerSettings{
+			np := actions.PlayerSettings{
 				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)
 		}
 
-		payload := PlayerSelection{
+		payload := actions.PlayerSelection{
 			Players: playerSettings,
 		}
 

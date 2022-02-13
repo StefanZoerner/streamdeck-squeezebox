@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	sdcontext "github.com/samwho/streamdeck/context"
@@ -14,7 +15,7 @@ import (
 )
 
 type AlbumArtActionSettings struct {
-	PlayerSettings
+	actions.PlayerSettings
 	Dimension  string `json:"albumart_dimension"`
 	TileNumber int    `json:"albumart_tile_number"`
 }
@@ -125,7 +126,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
-	settings, err := getPlayerSettingsFromWillDisappearEvent(event)
+	settings, err := actions.GetPlayerSettingsFromWillDisappearEvent(event)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
@@ -164,16 +165,16 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			return err
 		}
 
-		playerSettings := []PlayerSettings{}
+		playerSettings := []actions.PlayerSettings{}
 		for _, p := range players {
-			np := PlayerSettings{
+			np := actions.PlayerSettings{
 				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)
 		}
 
-		payload := PlayerSelection{
+		payload := actions.PlayerSelection{
 			Players: playerSettings,
 		}
 

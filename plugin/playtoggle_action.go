@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
@@ -45,7 +46,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
-		settings, err := getPlayerSettingsFromKeyDownEvent(event)
+		settings, err := actions.GetPlayerSettingsFromKeyDownEvent(event)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -75,7 +76,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
-		settings, err := getPlayerSettingsFromWillAppearEvent(event)
+		settings, err := actions.GetPlayerSettingsFromWillAppearEvent(event)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -110,7 +111,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 	playtoggleaction.RegisterHandler(streamdeck.WillDisappear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
-		settings, err := getPlayerSettingsFromWillDisappearEvent(event)
+		settings, err := actions.GetPlayerSettingsFromWillDisappearEvent(event)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -126,14 +127,14 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 		return nil
 	})
 
-	playtoggleaction.RegisterHandler(streamdeck.WillAppear, selectPlayerHandlerWillAppear)
+	playtoggleaction.RegisterHandler(streamdeck.WillAppear, actions.SelectPlayerHandlerWillAppear)
 	playtoggleaction.RegisterHandler(streamdeck.SendToPlugin, playToggleHandlerSendToPlugin)
 }
 
 func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
-	fromPI := DataFromPlayerSelectionPI{}
+	fromPI := actions.DataFromPlayerSelectionPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -152,16 +153,16 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 			return err
 		}
 
-		playerSettings := []PlayerSettings{}
+		playerSettings := []actions.PlayerSettings{}
 		for _, p := range players {
-			np := PlayerSettings{
+			np := actions.PlayerSettings{
 				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)
 		}
 
-		payload := PlayerSelection{
+		payload := actions.PlayerSelection{
 			Players: playerSettings,
 		}
 
@@ -191,7 +192,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 			return err
 		}
 
-		np := PlayerSettings{
+		np := actions.PlayerSettings{
 			PlayerId:   playerID,
 			PlayerName: pinfo.Name,
 		}

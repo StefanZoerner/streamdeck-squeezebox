@@ -1,4 +1,4 @@
-package plugin
+package actions
 
 import (
 	"context"
@@ -21,7 +21,7 @@ type DataFromPlayerSelectionPI struct {
 	Value   string `json:"value"`
 }
 
-func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func SelectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
@@ -50,7 +50,7 @@ func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Clien
 	return nil
 }
 
-func getPlayerSettingsFromKeyDownEvent(event streamdeck.Event) (PlayerSettings, error) {
+func GetPlayerSettingsFromKeyDownEvent(event streamdeck.Event) (PlayerSettings, error) {
 	settings := PlayerSettings{}
 
 	payload := streamdeck.KeyDownPayload{}
@@ -64,7 +64,7 @@ func getPlayerSettingsFromKeyDownEvent(event streamdeck.Event) (PlayerSettings, 
 	return settings, err
 }
 
-func getPlayerSettingsFromWillAppearEvent(event streamdeck.Event) (PlayerSettings, error) {
+func GetPlayerSettingsFromWillAppearEvent(event streamdeck.Event) (PlayerSettings, error) {
 	settings := PlayerSettings{}
 
 	payload := streamdeck.WillAppearPayload{}
@@ -77,7 +77,7 @@ func getPlayerSettingsFromWillAppearEvent(event streamdeck.Event) (PlayerSetting
 	return settings, err
 }
 
-func getPlayerSettingsFromWillDisappearEvent(event streamdeck.Event) (PlayerSettings, error) {
+func GetPlayerSettingsFromWillDisappearEvent(event streamdeck.Event) (PlayerSettings, error) {
 	settings := PlayerSettings{}
 
 	payload := streamdeck.WillDisappearPayload{}
