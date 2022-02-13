@@ -1,7 +1,6 @@
 package keyimages
 
 import (
-	"errors"
 	"fmt"
 	"github.com/samwho/streamdeck"
 	"image"
@@ -45,7 +44,7 @@ func GetStreamDeckImageForIcon(iconName string) (string, error) {
 
 	result, ok := keyIconCache[iconName]
 	if !ok {
-		err = errors.New(fmt.Sprintf("icon %s is unknown", iconName))
+		err = fmt.Errorf("icon %s is unknown", iconName)
 	}
 
 	return result, err
