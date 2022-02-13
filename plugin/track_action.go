@@ -79,14 +79,14 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := TrackActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -94,7 +94,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 	}
@@ -103,14 +103,14 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		settings.Direction = TRACK_NEXT
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 	}
 
 	err = trackSetKeyImage(ctx, client, settings.Direction)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -123,7 +123,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 	fromPI := TrackFromPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -133,7 +133,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -152,20 +152,20 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "sendFormData" {
 
 		err = client.SetSettings(ctx, fromPI.Settings)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
 		err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
 		if err != nil {
-			logError(client, event, err)
+			logErrorWithEvent(client, event, err)
 			return err
 		}
 
