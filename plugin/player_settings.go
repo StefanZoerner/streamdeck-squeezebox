@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/samwho/streamdeck"
 )
@@ -8,6 +9,44 @@ import (
 type PlayerSettings struct {
 	PlayerId   string `json:"player_id"`
 	PlayerName string `json:"player_name"`
+}
+
+type PlayerSelection struct {
+	Players []PlayerSettings `json:"players"`
+}
+
+type DataFromPlayerSelectionPI struct {
+	Command string `json:"command"`
+	Value   string `json:"value"`
+}
+
+func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	logEvent(client, event)
+
+	payload := streamdeck.WillAppearPayload{}
+	err := json.Unmarshal(event.Payload, &payload)
+	if err != nil {
+		logErrorWithEvent(client, event, err)
+		return err
+	}
+
+	settings := PlayerSettings{}
+	err = json.Unmarshal(payload.Settings, &settings)
+	if err != nil {
+		logErrorWithEvent(client, event, err)
+		return err
+	}
+
+	if settings.PlayerId == "" {
+		settings.PlayerName = "(None)"
+		err = client.SetSettings(ctx, settings)
+		if err != nil {
+			logErrorWithEvent(client, event, err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func getPlayerSettingsFromKeyDownEvent(event streamdeck.Event) (PlayerSettings, error) {
