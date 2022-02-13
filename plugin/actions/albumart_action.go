@@ -54,12 +54,12 @@ func SetupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
-	albumArtAction.RegisterHandler(streamdeck.SendToPlugin, albumArtSendToPlugin)
-	albumArtAction.RegisterHandler(streamdeck.WillAppear, albumArtWillAppear)
-	albumArtAction.RegisterHandler(streamdeck.WillDisappear, albumArtWillDisappear)
+	albumArtAction.RegisterHandler(streamdeck.SendToPlugin, albumartHandlerSendToPlugin)
+	albumArtAction.RegisterHandler(streamdeck.WillAppear, albumartHandlerWillAppear)
+	albumArtAction.RegisterHandler(streamdeck.WillDisappear, albumartHandlerWillDisappear)
 }
 
-func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumartHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	var err error
@@ -128,7 +128,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	return err
 }
 
-func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumartHandlerWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	var err error
@@ -149,60 +149,50 @@ func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event
 	return err
 }
 
-func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumartHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	fromPI := albumArtFromPI{}
-	err := json.Unmarshal(event.Payload, &fromPI)
+	err = json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
-
-		payload, err := getPlayerSelection()
+		var payload PlayerSelection
+		payload, err = getPlayerSelection()
 		if err == nil {
 			err = client.SendToPropertyInspector(ctx, &payload)
 		}
-
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
 	} else if fromPI.Command == "sendFormData" {
-
 		err = client.SetSettings(ctx, fromPI.Settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
+		if err == nil {
+			aao := albumArtObserver{
+				client:    client,
+				ctx:       ctx,
+				dimension: fromPI.Settings.Dimension,
+				tile:      fromPI.Settings.TileNumber,
+			}
+			general.RemoveOberserverForAllPlayers(aao)
+			general.AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
 
-		aao := albumArtObserver{
-			client:    client,
-			ctx:       ctx,
-			dimension: fromPI.Settings.Dimension,
-			tile:      fromPI.Settings.TileNumber,
-		}
-		general.RemoveOberserverForAllPlayers(aao)
-		general.AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
+			var url string
+			cp := general.GetPluginGlobalSettings().ConnectionProps()
 
-		cp := general.GetPluginGlobalSettings().ConnectionProps()
-		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+			url, err = squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
+			if err == nil {
+				err = showAlbumArtImage(ctx, client, url, fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
+			}
 		}
-
-		err = showAlbumArtImage(ctx, client, url, fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
 	}
 
-	return nil
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+	}
+	return err
 }
 
 func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim string, tile int) error {

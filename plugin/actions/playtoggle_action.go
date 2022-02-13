@@ -74,7 +74,6 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 		return err
 	})
 
-
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, SelectPlayerHandlerWillAppear)
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, playtoggleHandlerWillAppear)
 	playtoggleaction.RegisterHandler(streamdeck.WillDisappear, playtoggleHandlerWillDisappear)
@@ -132,7 +131,6 @@ func playtoggleHandlerWillDisappear(ctx context.Context, client *streamdeck.Clie
 
 	return nil
 }
-
 
 func playtoggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
