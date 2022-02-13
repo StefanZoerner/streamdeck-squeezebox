@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func logEvent(client *streamdeck.Client, event streamdeck.Event) {
+func LogEvent(client *streamdeck.Client, event streamdeck.Event) {
 
 	// Determine last part of dot divided action name
 	actionName := getActionNameFromEvent(event)
@@ -17,12 +17,12 @@ func logEvent(client *streamdeck.Client, event streamdeck.Event) {
 	client.LogMessage("Payload: " + string(pl) + "\n")
 }
 
-func logErrorWithEvent(client *streamdeck.Client, event streamdeck.Event, err error) {
+func LogErrorWithEvent(client *streamdeck.Client, event streamdeck.Event, err error) {
 	actionName := getActionNameFromEvent(event)
 	client.LogMessage("Error in " + actionName + " " + event.Event + ": " + err.Error())
 }
 
-func logErrorNoEvent(client *streamdeck.Client, err error) {
+func LogErrorNoEvent(client *streamdeck.Client, err error) {
 	client.LogMessage("Error: " + err.Error())
 }
 

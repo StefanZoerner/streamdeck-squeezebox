@@ -21,19 +21,19 @@ type DataFromPlayerSelectionPI struct {
 }
 
 func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	logEvent(client, event)
+	LogEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := PlayerSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -41,7 +41,7 @@ func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Clien
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}

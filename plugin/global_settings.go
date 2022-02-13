@@ -43,17 +43,17 @@ func (pgs PluginGlobalSettings) connectionProps() squeezebox.ConnectionPropertie
 }
 
 func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	// logEvent(client, event)
+	// LogEvent(client, event)
 
 	payload := streamdeck.DidReceiveGlobalSettingsPayload{}
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settingsFromPayload := PluginGlobalSettings{}
 	if err := json.Unmarshal(payload.Settings, &settingsFromPayload); err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -68,12 +68,12 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 }
 
 func WillAppearRequestGlobalSettingsHandler(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	// logEvent(client, event)
+	// LogEvent(client, event)
 	var err error
 
 	global := sdcontext.WithContext(context.Background(), pluginUUID)
 	if err = client.GetGlobalSettings(global); err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 	}
 
 	return err

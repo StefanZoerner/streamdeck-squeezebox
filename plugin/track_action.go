@@ -29,7 +29,7 @@ func setupTrackActions(client *streamdeck.Client) {
 	trackAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 
 	trackAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		logEvent(client, event)
+		LogEvent(client, event)
 
 		settings := TrackActionSettings{}
 		err := getSettingsFromKeydownEvent(event, &settings)
@@ -74,19 +74,19 @@ func getSettingsFromKeydownEvent(event streamdeck.Event, settings interface{}) e
 }
 
 func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	logEvent(client, event)
+	LogEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := TrackActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -94,7 +94,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}
@@ -103,14 +103,14 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		settings.Direction = TRACK_NEXT
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}
 
 	err = trackSetKeyImage(ctx, client, settings.Direction)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -118,12 +118,12 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 }
 
 func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	logEvent(client, event)
+	LogEvent(client, event)
 
 	fromPI := TrackFromPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		logErrorWithEvent(client, event, err)
+		LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -135,7 +135,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -154,20 +154,20 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "sendFormData" {
 
 		err = client.SetSettings(ctx, fromPI.Settings)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 
 		err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
 		if err != nil {
-			logErrorWithEvent(client, event, err)
+			LogErrorWithEvent(client, event, err)
 			return err
 		}
 
