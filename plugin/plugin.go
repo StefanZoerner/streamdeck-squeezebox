@@ -26,7 +26,7 @@ func Run(ctx context.Context) error {
 
 func setup(client *streamdeck.Client) {
 	setupConfigurationAction(client)
-	setupVolumeAction(client)
+	SetupVolumeAction(client)
 	setupPlaytoggleAction(client)
 	setupTrackActions(client)
 	setupAlbumArtAction(client)

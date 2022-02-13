@@ -26,7 +26,7 @@ type VolumeFromPI struct {
 	Settings VolumeActionSettings `json:"settings"`
 }
 
-func setupVolumeAction(client *streamdeck.Client) {
+func SetupVolumeAction(client *streamdeck.Client) {
 
 	volumeAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.volume")
 	volumeAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
