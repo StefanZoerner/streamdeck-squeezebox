@@ -121,41 +121,30 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	fromPI := TrackFromPI{}
-	err := json.Unmarshal(event.Payload, &fromPI)
+	err = json.Unmarshal(event.Payload, &fromPI)
+	if err == nil {
+		if fromPI.Command == "getPlayerSelectionOptions" {
+			var payload PlayerSelection
+			payload, err = getPlayerSelection()
+			if err == nil {
+				err = client.SendToPropertyInspector(ctx, &payload)
+			}
+		} else if fromPI.Command == "sendFormData" {
+			err = client.SetSettings(ctx, fromPI.Settings)
+			if err == nil {
+				err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
+			}
+		}
+	}
+		
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
-		return err
 	}
 
-	if fromPI.Command == "getPlayerSelectionOptions" {
-
-		payload, err := getPlayerSelection()
-		if err == nil {
-			err = client.SendToPropertyInspector(ctx, &payload)
-		}
-
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-	} else if fromPI.Command == "sendFormData" {
-
-		err = client.SetSettings(ctx, fromPI.Settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
-		err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
-	}
-
-	return nil
+	return err
 }
 
 func trackSetKeyImage(ctx context.Context, client *streamdeck.Client, direction string) error {
