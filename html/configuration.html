@@ -18,6 +18,11 @@
         </div>
 
         <div class="sdpi-item">
+            <div class="sdpi-item-label">HTTP Port</div>
+            <input class="sdpi-item-value" id="http_port" pattern="\d+" value="">
+        </div>
+
+        <div class="sdpi-item">
             <div class="sdpi-item-label"></div>
             <button class="sdpi-item-value"
                     id="test_button"
@@ -59,14 +64,15 @@
             actionInfo = {},
 
             hostname = "",
-            cli_port = ""
+            cli_port = "",
+            http_port = ""
         ;
 
         function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
 
             uuid = inPropertyInspectorUUID;
             actionInfo = JSON.parse(inActionInfo); // cache the info
-            document.getElementById('debug_info').value = inInfo;
+            document.getElementById('debug_info').value = actionInfo;
             websocket = new WebSocket("ws://localhost:" + inPort);
 
             websocket.onopen = function () {
@@ -94,6 +100,8 @@
 
                     document.getElementById('hostname').value = settings.hostname;
                     document.getElementById('cli_port').value = settings.cli_port;
+                    document.getElementById('http_port').value = settings.http_port;
+
 
                 } else if (event === 'sendToPropertyInspector') {
                     let payload = jsonObj['payload'];
@@ -106,14 +114,16 @@
         function sendToPlugin(command) {
             if (websocket) {
 
-                const hostname = document.getElementById('hostname').value
-                const cli_port = document.getElementById('cli_port').value
+                const hostname = document.getElementById('hostname').value;
+                const cli_port = document.getElementById('cli_port').value;
+                const http_port = document.getElementById('http_port').value;
 
                 const payload = {
                     "command": command,
                     "hostname": hostname,
-                    "cli_port": cli_port
-                }
+                    "cli_port": cli_port,
+                    "http_port": http_port
+                };
 
                 websocket.send(JSON.stringify({
                     "action": actionInfo['action'],
