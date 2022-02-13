@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-func ChangePlayerVolume(hostname string, cliPort int, playerID string, delta int) (int, error) {
+func ChangePlayerVolume(cp ConnectionProperties, playerID string, delta int) (int, error) {
 
-	connectionString := fmt.Sprintf("%s:%d", hostname, cliPort)
+	connectionString := fmt.Sprintf("%s:%d", cp.Hostname, cp.CLIPort)
 	con, err := net.Dial("tcp", connectionString)
 	if err != nil {
 		return 0, err
