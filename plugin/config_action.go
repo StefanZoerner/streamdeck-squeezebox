@@ -26,7 +26,7 @@ type ConfigurationMessage struct {
 func setupConfigurationAction(client *streamdeck.Client) {
 
 	configureaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.configure")
-	configureaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
+	configureaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 	configureaction.RegisterHandler(streamdeck.SendToPlugin, configHanderSendToPlugin)
 }
 
@@ -41,12 +41,12 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 
 	if fromPI.Command == "setConnection" {
 
-		newGlobalSettings := PluginGlobalSettings{}
+		newGlobalSettings := general.PluginGlobalSettings{}
 		newGlobalSettings.Hostname = fromPI.Hostname
 		newGlobalSettings.CLIPort, _ = strconv.Atoi(fromPI.CliPort)
 		newGlobalSettings.HTTPPort, _ = strconv.Atoi(fromPI.HttpPort)
 
-		globalCtx := sdcontext.WithContext(context.Background(), pluginUUID)
+		globalCtx := sdcontext.WithContext(context.Background(), general.PluginUUID)
 		if err := client.SetGlobalSettings(globalCtx, newGlobalSettings); err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err

@@ -2,11 +2,10 @@ package plugin
 
 import (
 	"context"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/samwho/streamdeck"
 	"os"
 )
-
-var pluginUUID string
 
 func Run(ctx context.Context) error {
 	params, err := streamdeck.ParseRegistrationParams(os.Args)
@@ -14,13 +13,13 @@ func Run(ctx context.Context) error {
 		return err
 	}
 
-	pluginUUID = params.PluginUUID
+	general.PluginUUID = params.PluginUUID
 	client := streamdeck.NewClient(ctx, params)
 
-	client.RegisterHandler(streamdeck.DidReceiveGlobalSettings, DidReceiveGlobalSettingsHandler)
+	client.RegisterHandler(streamdeck.DidReceiveGlobalSettings, general.DidReceiveGlobalSettingsHandler)
 	setup(client)
 
-	go StartTicker()
+	go general.StartTicker()
 
 	return client.Run()
 }

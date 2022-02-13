@@ -27,7 +27,7 @@ type TrackFromPI struct {
 
 func setupTrackActions(client *streamdeck.Client) {
 	trackAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.track")
-	trackAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
+	trackAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
 	trackAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
@@ -40,7 +40,7 @@ func setupTrackActions(client *streamdeck.Client) {
 				err = errors.New("no player configured")
 			} else {
 
-				globalSettings := GetPluginGlobalSettings()
+				globalSettings := general.GetPluginGlobalSettings()
 				delta := 0
 				if settings.Direction == TRACK_PREV {
 					delta = -1
@@ -128,7 +128,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 		return err
 	}
 
-	globalSettings := GetPluginGlobalSettings()
+	globalSettings := general.GetPluginGlobalSettings()
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 

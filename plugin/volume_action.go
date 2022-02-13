@@ -29,7 +29,7 @@ type VolumeFromPI struct {
 func setupVolumeAction(client *streamdeck.Client) {
 
 	volumeAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.volume")
-	volumeAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
+	volumeAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 	volumeAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
@@ -48,7 +48,7 @@ func setupVolumeAction(client *streamdeck.Client) {
 					delta = +10
 				}
 				if delta != 0 {
-					globalSettings := GetPluginGlobalSettings()
+					globalSettings := general.GetPluginGlobalSettings()
 					cp := globalSettings.ConnectionProps()
 					volume, err := squeezebox.ChangePlayerVolume(cp, settings.PlayerId, delta)
 					if err != nil {
@@ -141,7 +141,7 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 		return err
 	}
 
-	globalSettings := GetPluginGlobalSettings()
+	globalSettings := general.GetPluginGlobalSettings()
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 

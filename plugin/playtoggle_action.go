@@ -41,7 +41,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 	//
 	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
 
-	playtoggleaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
+	playtoggleaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
@@ -58,7 +58,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			return err
 		}
 
-		gs := GetPluginGlobalSettings()
+		gs := general.GetPluginGlobalSettings()
 		mode, err := squeezebox.TogglePlayerMode(gs.ConnectionProps(), settings.PlayerId)
 		if err != nil {
 			client.ShowAlert(ctx)
@@ -86,7 +86,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			return err
 		}
 
-		gs := GetPluginGlobalSettings()
+		gs := general.GetPluginGlobalSettings()
 		status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
@@ -101,7 +101,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			client: client,
 			ctx:    ctx,
 		}
-		count := AddOberserverForPlayer(settings.PlayerId, pmo)
+		count := general.AddOberserverForPlayer(settings.PlayerId, pmo)
 		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", pmo, settings.PlayerId, count))
 
 		return nil
@@ -120,7 +120,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			client: client,
 			ctx:    ctx,
 		}
-		count := RemoveOberserverForPlayer(settings.PlayerId, pmo)
+		count := general.RemoveOberserverForPlayer(settings.PlayerId, pmo)
 		client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", pmo, settings.PlayerId, count))
 
 		return nil
@@ -140,7 +140,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 		return err
 	}
 
-	globalSettings := GetPluginGlobalSettings()
+	globalSettings := general.GetPluginGlobalSettings()
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
@@ -176,11 +176,11 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 			client: client,
 			ctx:    ctx,
 		}
-		RemoveOberserverForAllPlayers(pmo)
+		general.RemoveOberserverForAllPlayers(pmo)
 		client.LogMessage(fmt.Sprintf("remove PlayerObserver for all players"))
 
 		playerID := fromPI.Value
-		count := AddOberserverForPlayer(playerID, pmo)
+		count := general.AddOberserverForPlayer(playerID, pmo)
 		client.LogMessage(fmt.Sprintf("add PlayerObserver for player %s, now %d", playerID, count))
 
 		conProps := globalSettings.ConnectionProps()

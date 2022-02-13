@@ -51,7 +51,7 @@ func (aao AlbumArtObserver) String() string {
 
 func setupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
-	albumArtAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
+	albumArtAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
 	albumArtAction.RegisterHandler(streamdeck.SendToPlugin, albumArtSendToPlugin)
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, albumArtWillAppear)
@@ -104,10 +104,10 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		dimension: settings.Dimension,
 		tile:      settings.TileNumber,
 	}
-	count := AddOberserverForPlayer(settings.PlayerId, aao)
+	count := general.AddOberserverForPlayer(settings.PlayerId, aao)
 	client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, settings.PlayerId, count))
 
-	conProps := GetPluginGlobalSettings().ConnectionProps()
+	conProps := general.GetPluginGlobalSettings().ConnectionProps()
 	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -135,7 +135,7 @@ func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event
 		client: client,
 		ctx:    ctx,
 	}
-	count := RemoveOberserverForPlayer(settings.PlayerId, aao)
+	count := general.RemoveOberserverForPlayer(settings.PlayerId, aao)
 	client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", aao, settings.PlayerId, count))
 
 	return nil
@@ -152,7 +152,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		return err
 	}
 
-	globalSettings := GetPluginGlobalSettings()
+	globalSettings := general.GetPluginGlobalSettings()
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
@@ -196,13 +196,13 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			dimension: fromPI.Settings.Dimension,
 			tile:      fromPI.Settings.TileNumber,
 		}
-		RemoveOberserverForAllPlayers(aao)
+		general.RemoveOberserverForAllPlayers(aao)
 		client.LogMessage(fmt.Sprintf("removed %s for all players", aao))
 
-		count := AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
+		count := general.AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
 		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, fromPI.Settings.PlayerId, count))
 
-		cp := GetPluginGlobalSettings().ConnectionProps()
+		cp := general.GetPluginGlobalSettings().ConnectionProps()
 		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
