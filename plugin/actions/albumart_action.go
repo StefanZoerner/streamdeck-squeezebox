@@ -152,32 +152,13 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		return err
 	}
 
-	globalSettings := general.GetPluginGlobalSettings()
-
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		conProps := globalSettings.ConnectionProps()
-
-		players, err := squeezebox.GetPlayerInfos(conProps)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+		payload, err := getPlayerSelection()
+		if err == nil {
+			err = client.SendToPropertyInspector(ctx, &payload)
 		}
 
-		playerSettings := []PlayerSettings{}
-		for _, p := range players {
-			np := PlayerSettings{
-				PlayerId:   p.ID,
-				PlayerName: p.Name,
-			}
-			playerSettings = append(playerSettings, np)
-		}
-
-		payload := PlayerSelection{
-			Players: playerSettings,
-		}
-
-		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err

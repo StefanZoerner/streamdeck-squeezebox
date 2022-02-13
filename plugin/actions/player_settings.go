@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
+	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
 )
 
@@ -19,6 +20,29 @@ type PlayerSelection struct {
 type DataFromPlayerSelectionPI struct {
 	Command string `json:"command"`
 	Value   string `json:"value"`
+}
+
+func getPlayerSelection() (PlayerSelection, error) {
+
+	selection := PlayerSelection{}
+
+	globalSettings := general.GetPluginGlobalSettings()
+	conProps := globalSettings.ConnectionProps()
+
+	players, err := squeezebox.GetPlayerInfos(conProps)
+	if err == nil {
+		playerSettings := []PlayerSettings{}
+		for _, p := range players {
+			np := PlayerSettings{
+				PlayerId:   p.ID,
+				PlayerName: p.Name,
+			}
+			playerSettings = append(playerSettings, np)
+		}
+		selection.Players = playerSettings
+	}
+
+	return selection, err
 }
 
 func SelectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
