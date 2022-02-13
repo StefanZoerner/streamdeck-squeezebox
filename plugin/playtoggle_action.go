@@ -59,7 +59,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 		}
 
 		gs := GetPluginGlobalSettings()
-		mode, err := squeezebox.TogglePlayerMode(gs.connectionProps(), settings.PlayerId)
+		mode, err := squeezebox.TogglePlayerMode(gs.ConnectionProps(), settings.PlayerId)
 		if err != nil {
 			client.ShowAlert(ctx)
 		} else {
@@ -87,7 +87,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 		}
 
 		gs := GetPluginGlobalSettings()
-		status, err := squeezebox.GetPlayerMode(gs.connectionProps(), settings.PlayerId)
+		status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 		} else {
@@ -144,7 +144,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		conProps := globalSettings.connectionProps()
+		conProps := globalSettings.ConnectionProps()
 
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
@@ -183,7 +183,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 		count := AddOberserverForPlayer(playerID, pmo)
 		client.LogMessage(fmt.Sprintf("add PlayerObserver for player %s, now %d", playerID, count))
 
-		conProps := globalSettings.connectionProps()
+		conProps := globalSettings.ConnectionProps()
 
 		pinfo, err := squeezebox.GetPlayerInfo(conProps, playerID)
 		if err != nil {

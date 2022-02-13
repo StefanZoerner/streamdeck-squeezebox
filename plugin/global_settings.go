@@ -33,7 +33,7 @@ func GetPluginGlobalSettings() *PluginGlobalSettings {
 	return instance
 }
 
-func (pgs PluginGlobalSettings) connectionProps() squeezebox.ConnectionProperties {
+func (pgs PluginGlobalSettings) ConnectionProps() squeezebox.ConnectionProperties {
 	cp := squeezebox.ConnectionProperties{
 		Hostname: pgs.Hostname,
 		HTTPPort: pgs.HTTPPort,

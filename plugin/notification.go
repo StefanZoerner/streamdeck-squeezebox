@@ -140,7 +140,7 @@ func StartTicker() {
 
 					if len(subject.observerList) > 0 {
 
-						cp := GetPluginGlobalSettings().connectionProps()
+						cp := GetPluginGlobalSettings().ConnectionProps()
 
 						status, _ := squeezebox.GetPlayerMode(cp, playerID)
 						subject.updatePlayMode(status)
