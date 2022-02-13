@@ -17,22 +17,14 @@ func init() {
 	playerSubjects = make(map[string]*playerSubject)
 }
 
-type observer interface {
-	getID() string
+type PlayerObserver interface {
+	GetID() string
 
-	playmodeChanged(newMode string)
-	albumArtChanged(newURL string)
+	PlaymodeChanged(newMode string)
+	AlbumArtChanged(newURL string)
 }
 
-type subject interface {
-	register(o observer)
-	deregister(o observer)
-
-	notifyPlaymodeChanged(newMode string)
-	albumArtChanged(newURL string)
-}
-
-func addOberserverForPlayer(playerID string, o observer) int {
+func AddOberserverForPlayer(playerID string, o PlayerObserver) int {
 
 	playerSubjectsLock.Lock()
 	defer playerSubjectsLock.Unlock()
@@ -46,7 +38,7 @@ func addOberserverForPlayer(playerID string, o observer) int {
 	return ps.register(o)
 }
 
-func removeOberserverForPlayer(playerID string, o observer) int {
+func RemoveOberserverForPlayer(playerID string, o PlayerObserver) int {
 	var count int
 
 	playerSubjectsLock.Lock()
@@ -60,7 +52,7 @@ func removeOberserverForPlayer(playerID string, o observer) int {
 	return count
 }
 
-func removeOberserverForAllPlayers(o observer) {
+func RemoveOberserverForAllPlayers(o PlayerObserver) {
 	playerSubjectsLock.Lock()
 	defer playerSubjectsLock.Unlock()
 
@@ -70,7 +62,7 @@ func removeOberserverForAllPlayers(o observer) {
 }
 
 type playerSubject struct {
-	observerList []observer
+	observerList []PlayerObserver
 	name         string
 	playMode     string
 	currentURL   string
@@ -98,32 +90,32 @@ func (ps *playerSubject) updateAlbumArt(newURL string) {
 	}
 }
 
-func (ps *playerSubject) register(o observer) int {
+func (ps *playerSubject) register(o PlayerObserver) int {
 	ps.observerList = append(ps.observerList, o)
 	return len(ps.observerList)
 }
 
-func (ps *playerSubject) deregister(o observer) int {
+func (ps *playerSubject) deregister(o PlayerObserver) int {
 	ps.observerList = removeFromslice(ps.observerList, o)
 	return len(ps.observerList)
 }
 
 func (ps *playerSubject) notifyPlaymodeChanged(newPlayMode string) {
 	for _, observer := range ps.observerList {
-		observer.playmodeChanged(newPlayMode)
+		observer.PlaymodeChanged(newPlayMode)
 	}
 }
 
 func (ps *playerSubject) notifyAlbumArtChanged(newURL string) {
 	for _, observer := range ps.observerList {
-		observer.albumArtChanged(newURL)
+		observer.AlbumArtChanged(newURL)
 	}
 }
 
-func removeFromslice(observerList []observer, observerToRemove observer) []observer {
+func removeFromslice(observerList []PlayerObserver, observerToRemove PlayerObserver) []PlayerObserver {
 	observerListLength := len(observerList)
 	for i, observer := range observerList {
-		if observerToRemove.getID() == observer.getID() {
+		if observerToRemove.GetID() == observer.GetID() {
 			observerList[observerListLength-1], observerList[i] = observerList[i], observerList[observerListLength-1]
 			return observerList[:observerListLength-1]
 		}
@@ -131,7 +123,7 @@ func removeFromslice(observerList []observer, observerToRemove observer) []obser
 	return observerList
 }
 
-func startTicker() {
+func StartTicker() {
 
 	// https://gobyexample.com/tickers
 

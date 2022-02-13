@@ -17,22 +17,22 @@ type PlayModeObserver struct {
 	ctx    context.Context
 }
 
-func (pmo PlayModeObserver) playmodeChanged(s string) {
+func (pmo PlayModeObserver) PlaymodeChanged(s string) {
 	err := setImageForPlayMode(pmo.ctx, pmo.client, s)
 	if err != nil {
 		pmo.client.LogMessage(err.Error())
 	}
 }
 
-func (pmo PlayModeObserver) albumArtChanged(_ string) {
+func (pmo PlayModeObserver) AlbumArtChanged(_ string) {
 }
 
-func (pmo PlayModeObserver) getID() string {
+func (pmo PlayModeObserver) GetID() string {
 	return sdcontext.Context(pmo.ctx)
 }
 
 func (pmo PlayModeObserver) String() string {
-	return "PlayModeObserver " + pmo.getID()[:5] + "..."
+	return "PlayModeObserver " + pmo.GetID()[:5] + "..."
 }
 
 func setupPlaytoggleAction(client *streamdeck.Client) {
@@ -101,7 +101,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			client: client,
 			ctx:    ctx,
 		}
-		count := addOberserverForPlayer(settings.PlayerId, pmo)
+		count := AddOberserverForPlayer(settings.PlayerId, pmo)
 		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", pmo, settings.PlayerId, count))
 
 		return nil
@@ -120,7 +120,7 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 			client: client,
 			ctx:    ctx,
 		}
-		count := removeOberserverForPlayer(settings.PlayerId, pmo)
+		count := RemoveOberserverForPlayer(settings.PlayerId, pmo)
 		client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", pmo, settings.PlayerId, count))
 
 		return nil
@@ -176,12 +176,12 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 			client: client,
 			ctx:    ctx,
 		}
-		removeOberserverForAllPlayers(pmo)
-		client.LogMessage(fmt.Sprintf("remove observer for all players"))
+		RemoveOberserverForAllPlayers(pmo)
+		client.LogMessage(fmt.Sprintf("remove PlayerObserver for all players"))
 
 		playerID := fromPI.Value
-		count := addOberserverForPlayer(playerID, pmo)
-		client.LogMessage(fmt.Sprintf("add observer for player %s, now %d", playerID, count))
+		count := AddOberserverForPlayer(playerID, pmo)
+		client.LogMessage(fmt.Sprintf("add PlayerObserver for player %s, now %d", playerID, count))
 
 		conProps := globalSettings.connectionProps()
 

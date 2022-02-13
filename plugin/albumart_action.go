@@ -31,22 +31,22 @@ type AlbumArtObserver struct {
 	tile      int
 }
 
-func (aao AlbumArtObserver) playmodeChanged(_ string) {
+func (aao AlbumArtObserver) PlaymodeChanged(_ string) {
 }
 
-func (aao AlbumArtObserver) albumArtChanged(newURL string) {
+func (aao AlbumArtObserver) AlbumArtChanged(newURL string) {
 	err := showAlbumArtImage(aao.ctx, aao.client, newURL, aao.dimension, aao.tile)
 	if err != nil {
 		general.LogErrorNoEvent(aao.client, err)
 	}
 }
 
-func (aao AlbumArtObserver) getID() string {
+func (aao AlbumArtObserver) GetID() string {
 	return sdcontext.Context(aao.ctx)
 }
 
 func (aao AlbumArtObserver) String() string {
-	return "AlbumArtObserver " + aao.getID()[:5] + "..."
+	return "AlbumArtObserver " + aao.GetID()[:5] + "..."
 }
 
 func setupAlbumArtAction(client *streamdeck.Client) {
@@ -104,7 +104,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		dimension: settings.Dimension,
 		tile:      settings.TileNumber,
 	}
-	count := addOberserverForPlayer(settings.PlayerId, aao)
+	count := AddOberserverForPlayer(settings.PlayerId, aao)
 	client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, settings.PlayerId, count))
 
 	conProps := GetPluginGlobalSettings().connectionProps()
@@ -135,7 +135,7 @@ func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event
 		client: client,
 		ctx:    ctx,
 	}
-	count := removeOberserverForPlayer(settings.PlayerId, aao)
+	count := RemoveOberserverForPlayer(settings.PlayerId, aao)
 	client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", aao, settings.PlayerId, count))
 
 	return nil
@@ -196,10 +196,10 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			dimension: fromPI.Settings.Dimension,
 			tile:      fromPI.Settings.TileNumber,
 		}
-		removeOberserverForAllPlayers(aao)
+		RemoveOberserverForAllPlayers(aao)
 		client.LogMessage(fmt.Sprintf("removed %s for all players", aao))
 
-		count := addOberserverForPlayer(fromPI.Settings.PlayerId, aao)
+		count := AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
 		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, fromPI.Settings.PlayerId, count))
 
 		cp := GetPluginGlobalSettings().connectionProps()
