@@ -79,8 +79,8 @@ type playerSubject struct {
 func newPlayerSubject(playerID string) *playerSubject {
 	return &playerSubject{
 		name:       playerID,
-		playMode:   "",
-		currentURL: "",
+		playMode:   "-",
+		currentURL: "-",
 	}
 }
 
@@ -147,9 +147,13 @@ func startTicker() {
 				for playerID, subject := range playerSubjects {
 
 					if len(subject.observerList) > 0 {
-						status, _ := getPlayMode(playerID)
+
+						cp := GetPluginGlobalSettings().connectionProps()
+
+						status, _ := squeezebox.GetPlayerMode(cp, playerID)
 						subject.updatePlayMode(status)
-						url, _ := getAlbumArtURL(playerID)
+
+						url, _ := squeezebox.GetCurrentArtworkURL(cp, playerID)
 						subject.updateAlbumArt(url)
 					}
 				}
@@ -157,16 +161,4 @@ func startTicker() {
 		}
 	}()
 
-}
-
-func getPlayMode(playerID string) (string, error) {
-	gs := GetPluginGlobalSettings()
-	status, err := squeezebox.GetPlayerMode(gs.Hostname, gs.CLIPort, playerID)
-	return status, err
-}
-
-func getAlbumArtURL(playerID string) (string, error) {
-	cp := GetPluginGlobalSettings().connectionProps()
-	status, err := squeezebox.GetCurrentArtworkURL(cp, playerID)
-	return status, err
 }
