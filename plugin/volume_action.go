@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
@@ -30,7 +31,7 @@ func setupVolumeAction(client *streamdeck.Client) {
 	volumeAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.volume")
 	volumeAction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	volumeAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		LogEvent(client, event)
+		general.LogEvent(client, event)
 
 		settings := VolumeActionSettings{}
 		err := getSettingsFromKeydownEvent(event, &settings)
@@ -87,19 +88,19 @@ func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, v
 }
 
 func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	LogEvent(client, event)
+	general.LogEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := VolumeActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -107,7 +108,7 @@ func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, eve
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}
@@ -116,14 +117,14 @@ func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, eve
 		settings.Kind = VolumeUp
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}
 
 	err = volumeSetKeyImage(ctx, client, settings.Kind)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -131,12 +132,12 @@ func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, eve
 }
 
 func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	LogEvent(client, event)
+	general.LogEvent(client, event)
 
 	fromPI := VolumeFromPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -147,7 +148,7 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 		conProps := globalSettings.connectionProps()
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -166,7 +167,7 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -174,13 +175,13 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 
 		err = client.SetSettings(ctx, fromPI.Settings)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
 		err = volumeSetKeyImage(ctx, client, fromPI.Settings.Kind)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 

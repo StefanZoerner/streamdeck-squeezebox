@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
@@ -42,18 +43,18 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, WillAppearRequestGlobalSettingsHandler)
 	playtoggleaction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		LogEvent(client, event)
+		general.LogEvent(client, event)
 
 		settings, err := getPlayerSettingsFromKeyDownEvent(event)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
 		if settings.PlayerId == "" {
 			client.ShowAlert(ctx)
 			err = errors.New("no player configured")
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -66,33 +67,33 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 		}
 
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 		}
 		return err
 	})
 
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		LogEvent(client, event)
+		general.LogEvent(client, event)
 
 		settings, err := getPlayerSettingsFromWillAppearEvent(event)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
 		if settings.PlayerId == "" {
-			LogErrorWithEvent(client, event, errors.New("no player configured"))
+			general.LogErrorWithEvent(client, event, errors.New("no player configured"))
 			return err
 		}
 
 		gs := GetPluginGlobalSettings()
 		status, err := squeezebox.GetPlayerMode(gs.connectionProps(), settings.PlayerId)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 		} else {
 			err = setImageForPlayMode(ctx, client, status)
 			if err != nil {
-				LogErrorWithEvent(client, event, err)
+				general.LogErrorWithEvent(client, event, err)
 			}
 		}
 
@@ -107,11 +108,11 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 	})
 
 	playtoggleaction.RegisterHandler(streamdeck.WillDisappear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		LogEvent(client, event)
+		general.LogEvent(client, event)
 
 		settings, err := getPlayerSettingsFromWillDisappearEvent(event)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -130,12 +131,12 @@ func setupPlaytoggleAction(client *streamdeck.Client) {
 }
 
 func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	LogEvent(client, event)
+	general.LogEvent(client, event)
 
 	fromPI := DataFromPlayerSelectionPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -147,7 +148,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -166,7 +167,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		err = client.SendToPropertyInspector(ctx, &payload)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 	} else if fromPI.Command == "setSelectedPlayer" {
@@ -186,7 +187,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		pinfo, err := squeezebox.GetPlayerInfo(conProps, playerID)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
@@ -197,7 +198,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		err = client.SetSettings(ctx, np)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}

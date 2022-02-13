@@ -1,4 +1,4 @@
-package plugin
+package general
 
 import (
 	"github.com/samwho/streamdeck"

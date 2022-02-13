@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/samwho/streamdeck"
 )
 
@@ -21,19 +22,19 @@ type DataFromPlayerSelectionPI struct {
 }
 
 func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	LogEvent(client, event)
+	general.LogEvent(client, event)
 
 	payload := streamdeck.WillAppearPayload{}
 	err := json.Unmarshal(event.Payload, &payload)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settings := PlayerSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -41,7 +42,7 @@ func selectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Clien
 		settings.PlayerName = "(None)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 	}

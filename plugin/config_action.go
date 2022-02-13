@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
 	"github.com/samwho/streamdeck"
 	sdcontext "github.com/samwho/streamdeck/context"
@@ -30,11 +31,11 @@ func setupConfigurationAction(client *streamdeck.Client) {
 }
 
 func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-	LogEvent(client, event)
+	general.LogEvent(client, event)
 
 	fromPI := ConfigurationDataFromPI{}
 	if err := json.Unmarshal(event.Payload, &fromPI); err != nil {
-		LogErrorWithEvent(client, event, err)
+		general.LogErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -47,13 +48,13 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 
 		globalCtx := sdcontext.WithContext(context.Background(), pluginUUID)
 		if err := client.SetGlobalSettings(globalCtx, newGlobalSettings); err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
 		// Enforce Reload of Global S3ttings via an Event
 		if err := client.GetGlobalSettings(globalCtx); err != nil {
-			LogErrorWithEvent(client, event, err)
+			general.LogErrorWithEvent(client, event, err)
 			return err
 		}
 
