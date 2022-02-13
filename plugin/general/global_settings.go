@@ -22,7 +22,7 @@ func init() {
 	instance = &PluginGlobalSettings{
 
 		// Default values
-		Hostname: "hostname",
+		Hostname: "",
 		CLIPort:  9090,
 		HTTPPort: 9000,
 	}
@@ -59,7 +59,7 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 		return err
 	}
 
-	// Store Global Settings in Server Settings
+	// Store Global settings in Server settings
 	//
 	serverSettings := GetPluginGlobalSettings()
 	serverSettings.Hostname = settingsFromPayload.Hostname

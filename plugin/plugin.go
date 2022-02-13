@@ -29,6 +29,6 @@ func setup(client *streamdeck.Client) {
 	actions.SetupConfigurationAction(client)
 	actions.SetupVolumeAction(client)
 	actions.SetupPlaytoggleAction(client)
-	actions.SetupTrackActions(client)
+	actions.SetupTrackAction(client)
 	actions.SetupAlbumArtAction(client)
 }

@@ -11,28 +11,28 @@ import (
 )
 
 const (
-	TRACK_PREV = "prev"
-	TRACK_NEXT = "next"
+	TrackPrev = "prev"
+	TrackNext = "next"
 )
 
-type TrackActionSettings struct {
+type trackActionSettings struct {
 	PlayerSettings
 	Direction string `json:"track_direction"`
 }
 
-type TrackFromPI struct {
+type trackFromPI struct {
 	Command  string              `json:"command"`
-	Settings TrackActionSettings `json:"settings"`
+	Settings trackActionSettings `json:"Settings"`
 }
 
-func SetupTrackActions(client *streamdeck.Client) {
+func SetupTrackAction(client *streamdeck.Client) {
 	trackAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.track")
 	trackAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
 	trackAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 		general.LogEvent(client, event)
 
-		settings := TrackActionSettings{}
+		settings := trackActionSettings{}
 		err := getSettingsFromKeydownEvent(event, &settings)
 		if err == nil {
 			if settings.PlayerId == "" {
@@ -42,9 +42,9 @@ func SetupTrackActions(client *streamdeck.Client) {
 
 				globalSettings := general.GetPluginGlobalSettings()
 				delta := 0
-				if settings.Direction == TRACK_PREV {
+				if settings.Direction == TrackPrev {
 					delta = -1
-				} else if settings.Direction == TRACK_NEXT {
+				} else if settings.Direction == TrackNext {
 					delta = +1
 				}
 				if delta != 0 {
@@ -84,7 +84,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		return err
 	}
 
-	settings := TrackActionSettings{}
+	settings := trackActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -101,7 +101,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 	}
 
 	if settings.Direction == "" {
-		settings.Direction = TRACK_NEXT
+		settings.Direction = TrackNext
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
@@ -123,7 +123,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 	var err error
 
-	fromPI := TrackFromPI{}
+	fromPI := trackFromPI{}
 	err = json.Unmarshal(event.Payload, &fromPI)
 	if err == nil {
 		if fromPI.Command == "getPlayerSelectionOptions" {
@@ -139,7 +139,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 			}
 		}
 	}
-		
+
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 	}
@@ -151,12 +151,12 @@ func trackSetKeyImage(ctx context.Context, client *streamdeck.Client, direction 
 	var err error
 
 	switch direction {
-	case TRACK_NEXT:
+	case TrackNext:
 		image, err := keyimages.GetStreamDeckImageForIcon("track_next")
 		if err == nil {
 			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 		}
-	case TRACK_PREV:
+	case TrackPrev:
 		image, err := keyimages.GetStreamDeckImageForIcon("track_prev")
 		if err == nil {
 			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)

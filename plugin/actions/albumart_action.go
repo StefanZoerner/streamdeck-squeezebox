@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	sdcontext "github.com/samwho/streamdeck/context"
@@ -13,42 +12,44 @@ import (
 	"github.com/samwho/streamdeck"
 )
 
-type AlbumArtActionSettings struct {
+type albumArtActionSettings struct {
 	PlayerSettings
 	Dimension  string `json:"albumart_dimension"`
 	TileNumber int    `json:"albumart_tile_number"`
 }
 
-type AlbumArtFromPI struct {
+type albumArtFromPI struct {
 	Command  string                 `json:"command"`
-	Settings AlbumArtActionSettings `json:"settings"`
+	Settings albumArtActionSettings `json:"settings"`
 }
 
-type AlbumArtObserver struct {
+type albumArtObserver struct {
 	client    *streamdeck.Client
 	ctx       context.Context
 	dimension string
 	tile      int
 }
 
-func (aao AlbumArtObserver) PlaymodeChanged(_ string) {
+func (aao albumArtObserver) PlaymodeChanged(_ string) {
 }
 
-func (aao AlbumArtObserver) AlbumArtChanged(newURL string) {
+func (aao albumArtObserver) AlbumArtChanged(newURL string) {
 	err := showAlbumArtImage(aao.ctx, aao.client, newURL, aao.dimension, aao.tile)
 	if err != nil {
 		general.LogErrorNoEvent(aao.client, err)
 	}
 }
 
-func (aao AlbumArtObserver) GetID() string {
+func (aao albumArtObserver) GetID() string {
 	return sdcontext.Context(aao.ctx)
 }
 
-func (aao AlbumArtObserver) String() string {
-	return "AlbumArtObserver " + aao.GetID()[:5] + "..."
+func (aao albumArtObserver) String() string {
+	return "albumArtObserver " + aao.GetID()[:5] + "..."
 }
 
+// SetupAlbumArtAction adds the albumart action to the plugin.
+//
 func SetupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
@@ -70,7 +71,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		return err
 	}
 
-	settings := AlbumArtActionSettings{}
+	settings := albumArtActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -100,7 +101,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		}
 	}
 
-	aao := AlbumArtObserver{
+	aao := albumArtObserver{
 		client:    client,
 		ctx:       ctx,
 		dimension: settings.Dimension,
@@ -130,27 +131,28 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
-	settings, err := GetPlayerSettingsFromWillDisappearEvent(event)
+	var err error
+	var settings PlayerSettings
+
+	settings, err = GetPlayerSettingsFromWillDisappearEvent(event)
+	if err == nil {
+		aao := albumArtObserver{
+			client: client,
+			ctx:    ctx,
+		}
+		general.RemoveOberserverForPlayer(settings.PlayerId, aao)
+	}
+
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
-		return err
 	}
-
-	aao := AlbumArtObserver{
-		client: client,
-		ctx:    ctx,
-	}
-	count := general.RemoveOberserverForPlayer(settings.PlayerId, aao)
-	client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", aao, settings.PlayerId, count))
-
-	return nil
-
+	return err
 }
 
 func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
-	fromPI := AlbumArtFromPI{}
+	fromPI := albumArtFromPI{}
 	err := json.Unmarshal(event.Payload, &fromPI)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -176,7 +178,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			return err
 		}
 
-		aao := AlbumArtObserver{
+		aao := albumArtObserver{
 			client:    client,
 			ctx:       ctx,
 			dimension: fromPI.Settings.Dimension,
@@ -216,19 +218,17 @@ func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim 
 	// Ignore error (if any)  and try to render (default) image, if availaible
 	if img != nil {
 
-		tileImage, err := keyimages.ResizeAndCropImage(img, dim, tile)
-		if err != nil {
-			general.LogErrorNoEvent(client, err)
-			return err
-		}
+		var tileImage image.Image
 
-		s, _ := streamdeck.Image(tileImage)
-		err = client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
-		if err != nil {
-			general.LogErrorNoEvent(client, err)
-			return err
+		tileImage, err = keyimages.ResizeAndCropImage(img, dim, tile)
+		if err == nil {
+			s, _ := streamdeck.Image(tileImage)
+			err = client.SetImage(ctx, s, streamdeck.HardwareAndSoftware)
 		}
 	}
 
+	if err != nil {
+		general.LogErrorNoEvent(client, err)
+	}
 	return err
 }

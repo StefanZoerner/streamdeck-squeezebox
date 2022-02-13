@@ -12,29 +12,31 @@ import (
 	sdcontext "github.com/samwho/streamdeck/context"
 )
 
-type PlayModeObserver struct {
+type playModeObserver struct {
 	client *streamdeck.Client
 	ctx    context.Context
 }
 
-func (pmo PlayModeObserver) PlaymodeChanged(s string) {
+func (pmo playModeObserver) PlaymodeChanged(s string) {
 	err := setImageForPlayMode(pmo.ctx, pmo.client, s)
 	if err != nil {
 		pmo.client.LogMessage(err.Error())
 	}
 }
 
-func (pmo PlayModeObserver) AlbumArtChanged(_ string) {
+func (pmo playModeObserver) AlbumArtChanged(_ string) {
 }
 
-func (pmo PlayModeObserver) GetID() string {
+func (pmo playModeObserver) GetID() string {
 	return sdcontext.Context(pmo.ctx)
 }
 
-func (pmo PlayModeObserver) String() string {
-	return "PlayModeObserver " + pmo.GetID()[:5] + "..."
+func (pmo playModeObserver) String() string {
+	return "playModeObserver " + pmo.GetID()[:5] + "..."
 }
 
+// SetupPlaytoggleAction adds the playtoggle action to the plugin.
+//
 func SetupPlaytoggleAction(client *streamdeck.Client) {
 
 	// Play Toggle
@@ -72,65 +74,67 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 		return err
 	})
 
-	playtoggleaction.RegisterHandler(streamdeck.WillAppear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		general.LogEvent(client, event)
-
-		settings, err := GetPlayerSettingsFromWillAppearEvent(event)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
-		if settings.PlayerId == "" {
-			general.LogErrorWithEvent(client, event, errors.New("no player configured"))
-			return err
-		}
-
-		gs := general.GetPluginGlobalSettings()
-		status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-		} else {
-			err = setImageForPlayMode(ctx, client, status)
-			if err != nil {
-				general.LogErrorWithEvent(client, event, err)
-			}
-		}
-
-		pmo := PlayModeObserver{
-			client: client,
-			ctx:    ctx,
-		}
-		count := general.AddOberserverForPlayer(settings.PlayerId, pmo)
-		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", pmo, settings.PlayerId, count))
-
-		return nil
-	})
-
-	playtoggleaction.RegisterHandler(streamdeck.WillDisappear, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		general.LogEvent(client, event)
-
-		settings, err := GetPlayerSettingsFromWillDisappearEvent(event)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-
-		pmo := PlayModeObserver{
-			client: client,
-			ctx:    ctx,
-		}
-		count := general.RemoveOberserverForPlayer(settings.PlayerId, pmo)
-		client.LogMessage(fmt.Sprintf("remove %s for player %s, now total %d", pmo, settings.PlayerId, count))
-
-		return nil
-	})
 
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, SelectPlayerHandlerWillAppear)
-	playtoggleaction.RegisterHandler(streamdeck.SendToPlugin, playToggleHandlerSendToPlugin)
+	playtoggleaction.RegisterHandler(streamdeck.WillAppear, playtoggleHandlerWillAppear)
+	playtoggleaction.RegisterHandler(streamdeck.WillDisappear, playtoggleHandlerWillDisappear)
+	playtoggleaction.RegisterHandler(streamdeck.SendToPlugin, playtoggleHandlerSendToPlugin)
 }
 
-func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func playtoggleHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	general.LogEvent(client, event)
+
+	settings, err := GetPlayerSettingsFromWillAppearEvent(event)
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+		return err
+	}
+
+	if settings.PlayerId == "" {
+		general.LogErrorWithEvent(client, event, errors.New("no player configured"))
+		return err
+	}
+
+	gs := general.GetPluginGlobalSettings()
+	status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+	} else {
+		err = setImageForPlayMode(ctx, client, status)
+		if err != nil {
+			general.LogErrorWithEvent(client, event, err)
+		}
+	}
+
+	pmo := playModeObserver{
+		client: client,
+		ctx:    ctx,
+	}
+	general.AddOberserverForPlayer(settings.PlayerId, pmo)
+
+	return nil
+}
+
+func playtoggleHandlerWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	general.LogEvent(client, event)
+
+	settings, err := GetPlayerSettingsFromWillDisappearEvent(event)
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+		return err
+	}
+
+	pmo := playModeObserver{
+		client: client,
+		ctx:    ctx,
+	}
+	general.RemoveOberserverForPlayer(settings.PlayerId, pmo)
+
+	return nil
+}
+
+
+func playtoggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	var err error
@@ -153,7 +157,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		playerID := fromPI.Value
 
-		pmo := PlayModeObserver{
+		pmo := playModeObserver{
 			client: client,
 			ctx:    ctx,
 		}
