@@ -54,7 +54,7 @@ func fillRectangle(img *image.RGBA, startX, startY, width, height int, c color.C
 
 // Inspired by https://riptutorial.com/go/example/31687/cropping-image
 
-func CropImage(img image.Image, cropRect image.Rectangle) (cropImg image.Image, err error) {
+func cropImage(img image.Image, cropRect image.Rectangle) (cropImg image.Image, err error) {
 
 	//Interface for asserting whether `img`
 	//implements SubImage or not.
