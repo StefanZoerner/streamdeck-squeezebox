@@ -143,7 +143,9 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		players, err := squeezebox.GetPlayers(globalSettings.Hostname, globalSettings.CLIPort)
+		conProps := globalSettings.connectionProps()
+
+		players, err := squeezebox.GetPlayers(conProps)
 		if err != nil {
 			logErrorWithEvent(client, event, err)
 			return err
@@ -180,7 +182,9 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 		count := addOberserverForPlayer(playerID, pmo)
 		client.LogMessage(fmt.Sprintf("add observer for player %s, now %d", playerID, count))
 
-		pinfo, err := squeezebox.GetPlayerInfo(globalSettings.Hostname, globalSettings.CLIPort, playerID)
+		conProps := globalSettings.connectionProps()
+
+		pinfo, err := squeezebox.GetPlayerInfo(conProps, playerID)
 		if err != nil {
 			logErrorWithEvent(client, event, err)
 			return err
