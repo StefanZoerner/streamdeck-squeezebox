@@ -13,6 +13,10 @@ type ConnectionProperties struct {
 	CLIPort  int
 }
 
+func (cp *ConnectionProperties) NotEmpty() bool {
+	return cp.Hostname != "" && cp.CLIPort > 0 && cp.HTTPPort > 0
+}
+
 func NewConnectionProperties(hostname string, httpPort, cliPort int) ConnectionProperties {
 	return ConnectionProperties{
 		Hostname: hostname,

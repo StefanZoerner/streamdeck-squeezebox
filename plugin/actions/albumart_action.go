@@ -61,8 +61,10 @@ func SetupAlbumArtAction(client *streamdeck.Client) {
 func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	payload := streamdeck.WillAppearPayload{}
-	err := json.Unmarshal(event.Payload, &payload)
+	err = json.Unmarshal(event.Payload, &payload)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
@@ -104,14 +106,17 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 		dimension: settings.Dimension,
 		tile:      settings.TileNumber,
 	}
-	count := general.AddOberserverForPlayer(settings.PlayerId, aao)
-	client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, settings.PlayerId, count))
+	general.AddOberserverForPlayer(settings.PlayerId, aao)
 
 	conProps := general.GetPluginGlobalSettings().ConnectionProps()
-	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
+
+	var url string
+	if conProps.NotEmpty() {
+		url, err = squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
+		if err != nil {
+			general.LogErrorWithEvent(client, event, err)
+			return err
+		}
 	}
 
 	err = showAlbumArtImage(ctx, client, url, settings.Dimension, settings.TileNumber)
@@ -178,10 +183,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			tile:      fromPI.Settings.TileNumber,
 		}
 		general.RemoveOberserverForAllPlayers(aao)
-		client.LogMessage(fmt.Sprintf("removed %s for all players", aao))
-
-		count := general.AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
-		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, fromPI.Settings.PlayerId, count))
+		general.AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
 
 		cp := general.GetPluginGlobalSettings().ConnectionProps()
 		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
@@ -203,8 +205,6 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim string, tile int) error {
 
-	client.LogMessage(fmt.Sprintf("showAlbumArtImage %s tile %d: %s", dim, tile, url))
-
 	var img image.Image
 	var err error
 
@@ -215,8 +215,6 @@ func showAlbumArtImage(ctx context.Context, client *streamdeck.Client, url, dim 
 
 	// Ignore error (if any)  and try to render (default) image, if availaible
 	if img != nil {
-		client.LogMessage(fmt.Sprintf("IMG =  %s ", img.Bounds()))
-		client.LogMessage(fmt.Sprintf("ResizeAndCropImage %s tile %d", dim, tile))
 
 		tileImage, err := keyimages.ResizeAndCropImage(img, dim, tile)
 		if err != nil {
