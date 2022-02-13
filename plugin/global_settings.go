@@ -24,7 +24,7 @@ func init() {
 		// Default values
 		Hostname: "hostname",
 		CLIPort:  9090,
-		HTTPPort: 9002, // TODO: Modify to 9000
+		HTTPPort: 9000,
 	}
 }
 
@@ -47,13 +47,13 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 
 	payload := streamdeck.DidReceiveGlobalSettingsPayload{}
 	if err := json.Unmarshal(event.Payload, &payload); err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
 	settingsFromPayload := PluginGlobalSettings{}
 	if err := json.Unmarshal(payload.Settings, &settingsFromPayload); err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 		return err
 	}
 
@@ -73,7 +73,7 @@ func WillAppearRequestGlobalSettingsHandler(ctx context.Context, client *streamd
 
 	global := sdcontext.WithContext(context.Background(), pluginUUID)
 	if err = client.GetGlobalSettings(global); err != nil {
-		logError(client, event, err)
+		logErrorWithEvent(client, event, err)
 	}
 
 	return err
