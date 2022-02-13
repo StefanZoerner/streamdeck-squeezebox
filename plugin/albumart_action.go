@@ -107,7 +107,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 	count := AddOberserverForPlayer(settings.PlayerId, aao)
 	client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, settings.PlayerId, count))
 
-	conProps := GetPluginGlobalSettings().connectionProps()
+	conProps := GetPluginGlobalSettings().ConnectionProps()
 	url, err := squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
@@ -156,7 +156,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		conProps := globalSettings.connectionProps()
+		conProps := globalSettings.ConnectionProps()
 
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
@@ -202,7 +202,7 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 		count := AddOberserverForPlayer(fromPI.Settings.PlayerId, aao)
 		client.LogMessage(fmt.Sprintf("added %s for player %s, now total %d", aao, fromPI.Settings.PlayerId, count))
 
-		cp := GetPluginGlobalSettings().connectionProps()
+		cp := GetPluginGlobalSettings().ConnectionProps()
 		url, err := squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)

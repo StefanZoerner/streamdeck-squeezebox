@@ -132,7 +132,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
-		conProps := globalSettings.connectionProps()
+		conProps := globalSettings.ConnectionProps()
 
 		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
