@@ -145,7 +145,7 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 	if fromPI.Command == "getPlayerSelectionOptions" {
 
 		conProps := globalSettings.connectionProps()
-		players, err := squeezebox.GetPlayers(conProps)
+		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
 			logErrorWithEvent(client, event, err)
 			return err

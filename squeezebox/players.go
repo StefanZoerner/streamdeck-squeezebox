@@ -11,7 +11,7 @@ type PlayerInfo struct {
 	Name string
 }
 
-func GetPlayers(cp ConnectionProperties) ([]PlayerInfo, error) {
+func GetPlayerInfos(cp ConnectionProperties) ([]PlayerInfo, error) {
 
 	connectionString := fmt.Sprintf("%s:%d", cp.Hostname, cp.CLIPort)
 	con, err := net.Dial("tcp", connectionString)

@@ -145,7 +145,7 @@ func playToggleHandlerSendToPlugin(ctx context.Context, client *streamdeck.Clien
 
 		conProps := globalSettings.connectionProps()
 
-		players, err := squeezebox.GetPlayers(conProps)
+		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
 			logErrorWithEvent(client, event, err)
 			return err

@@ -133,7 +133,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 		conProps := globalSettings.connectionProps()
 
-		players, err := squeezebox.GetPlayers(conProps)
+		players, err := squeezebox.GetPlayerInfos(conProps)
 		if err != nil {
 			logErrorWithEvent(client, event, err)
 			return err
