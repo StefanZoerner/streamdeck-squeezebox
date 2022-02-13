@@ -41,3 +41,35 @@ func CheckConnectionCLI(cp ConnectionProperties) error {
 
 	return nil
 }
+
+func CheckConnectionToPlayer(hostname string, port int, playerID string) error {
+
+	connectionString := fmt.Sprintf("%s:%d", hostname, port)
+	con, err := net.Dial("tcp", connectionString)
+	if err != nil {
+		return err
+	}
+	defer con.Close()
+
+	cmd := fmt.Sprintf("%s connected ?\n", playerID)
+	_, err = con.Write([]byte(cmd))
+	if err != nil {
+		return err
+	}
+
+	reply := make([]byte, 1024)
+	_, err = con.Read(reply)
+	if err != nil {
+		return err
+	}
+
+	sReply := string(reply)
+	sReply = strings.ReplaceAll(sReply, "\n", "")
+	result := strings.Split(sReply, " ")[2]
+
+	if strings.Contains(result, "%3F") {
+		return errors.New("Player " + playerID + " not connected to server.")
+	}
+
+	return nil
+}
