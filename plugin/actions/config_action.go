@@ -1,4 +1,4 @@
-package plugin
+package actions
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type ConfigurationMessage struct {
 	Content string `json:"content"`
 }
 
-func setupConfigurationAction(client *streamdeck.Client) {
+func SetupConfigurationAction(client *streamdeck.Client) {
 
 	configureaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.configure")
 	configureaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)

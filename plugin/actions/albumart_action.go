@@ -1,10 +1,9 @@
-package plugin
+package actions
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	sdcontext "github.com/samwho/streamdeck/context"
@@ -15,7 +14,7 @@ import (
 )
 
 type AlbumArtActionSettings struct {
-	actions.PlayerSettings
+	PlayerSettings
 	Dimension  string `json:"albumart_dimension"`
 	TileNumber int    `json:"albumart_tile_number"`
 }
@@ -50,7 +49,7 @@ func (aao AlbumArtObserver) String() string {
 	return "AlbumArtObserver " + aao.GetID()[:5] + "..."
 }
 
-func setupAlbumArtAction(client *streamdeck.Client) {
+func SetupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.albumart")
 	albumArtAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
@@ -126,7 +125,7 @@ func albumArtWillAppear(ctx context.Context, client *streamdeck.Client, event st
 func albumArtWillDisappear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
-	settings, err := actions.GetPlayerSettingsFromWillDisappearEvent(event)
+	settings, err := GetPlayerSettingsFromWillDisappearEvent(event)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
@@ -165,16 +164,16 @@ func albumArtSendToPlugin(ctx context.Context, client *streamdeck.Client, event 
 			return err
 		}
 
-		playerSettings := []actions.PlayerSettings{}
+		playerSettings := []PlayerSettings{}
 		for _, p := range players {
-			np := actions.PlayerSettings{
+			np := PlayerSettings{
 				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)
 		}
 
-		payload := actions.PlayerSelection{
+		payload := PlayerSelection{
 			Players: playerSettings,
 		}
 

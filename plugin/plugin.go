@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"context"
+	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/samwho/streamdeck"
 	"os"
@@ -25,9 +26,9 @@ func Run(ctx context.Context) error {
 }
 
 func setup(client *streamdeck.Client) {
-	setupConfigurationAction(client)
-	SetupVolumeAction(client)
-	setupPlaytoggleAction(client)
-	setupTrackActions(client)
-	setupAlbumArtAction(client)
+	actions.SetupConfigurationAction(client)
+	actions.SetupVolumeAction(client)
+	actions.SetupPlaytoggleAction(client)
+	actions.SetupTrackActions(client)
+	actions.SetupAlbumArtAction(client)
 }

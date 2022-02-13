@@ -1,10 +1,9 @@
-package plugin
+package actions
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/actions"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
@@ -17,7 +16,7 @@ const (
 )
 
 type TrackActionSettings struct {
-	actions.PlayerSettings
+	PlayerSettings
 	Direction string `json:"track_direction"`
 }
 
@@ -26,7 +25,7 @@ type TrackFromPI struct {
 	Settings TrackActionSettings `json:"settings"`
 }
 
-func setupTrackActions(client *streamdeck.Client) {
+func SetupTrackActions(client *streamdeck.Client) {
 	trackAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.track")
 	trackAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
@@ -141,16 +140,16 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 			return err
 		}
 
-		playerSettings := []actions.PlayerSettings{}
+		playerSettings := []PlayerSettings{}
 		for _, p := range players {
-			np := actions.PlayerSettings{
+			np := PlayerSettings{
 				PlayerId:   p.ID,
 				PlayerName: p.Name,
 			}
 			playerSettings = append(playerSettings, np)
 		}
 
-		payload := actions.PlayerSelection{
+		payload := PlayerSelection{
 			Players: playerSettings,
 		}
 
