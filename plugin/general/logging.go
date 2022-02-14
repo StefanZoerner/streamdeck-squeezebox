@@ -11,19 +11,19 @@ func LogEvent(client *streamdeck.Client, event streamdeck.Event) {
 	actionName := getActionNameFromEvent(event)
 
 	msg := actionName + " " + event.Event + " "
-	client.LogMessage("Event : " + msg)
+	_ = client.LogMessage("Event : " + msg)
 	pl, _ := event.Payload.MarshalJSON()
 
-	client.LogMessage("Payload: " + string(pl) + "\n")
+	_ = client.LogMessage("Payload: " + string(pl) + "\n")
 }
 
 func LogErrorWithEvent(client *streamdeck.Client, event streamdeck.Event, err error) {
 	actionName := getActionNameFromEvent(event)
-	client.LogMessage("Error in " + actionName + " " + event.Event + ": " + err.Error())
+	_ = client.LogMessage("Error in " + actionName + " " + event.Event + ": " + err.Error())
 }
 
 func LogErrorNoEvent(client *streamdeck.Client, err error) {
-	client.LogMessage("Error: " + err.Error())
+	_ = client.LogMessage("Error: " + err.Error())
 }
 
 func getActionNameFromEvent(event streamdeck.Event) string {

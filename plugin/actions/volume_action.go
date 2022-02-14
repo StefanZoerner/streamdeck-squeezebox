@@ -181,7 +181,6 @@ func volumeSetKeyImage(ctx context.Context, client *streamdeck.Client, kind stri
 		if err == nil {
 			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 		}
-		break
 	case VolumeDown:
 		image, err := keyimages.GetStreamDeckImageForIcon("volume_down")
 		if err == nil {

@@ -20,7 +20,7 @@ type playModeObserver struct {
 func (pmo playModeObserver) PlaymodeChanged(s string) {
 	err := setImageForPlayMode(pmo.ctx, pmo.client, s)
 	if err != nil {
-		pmo.client.LogMessage(err.Error())
+		_ = pmo.client.LogMessage(err.Error())
 	}
 }
 
@@ -197,7 +197,8 @@ func setImageForPlayMode(ctx context.Context, client *streamdeck.Client, mode st
 	}
 
 	if err == nil {
-		image, err := keyimages.GetStreamDeckImageForIcon(icon)
+		var image string
+		image, err = keyimages.GetStreamDeckImageForIcon(icon)
 		if err == nil {
 			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 		}

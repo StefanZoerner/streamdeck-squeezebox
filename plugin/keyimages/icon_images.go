@@ -31,7 +31,7 @@ func init() {
 	for _, name := range iconNames {
 		sdImage, err := loadStreamDeckImageForIcon(name)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("icon %s not found, %s", name, err.Error()))
+			fmt.Printf("icon %s not found, %s\n", name, err.Error())
 		} else {
 			keyIconCache[name] = sdImage
 		}
@@ -39,7 +39,7 @@ func init() {
 }
 
 func GetStreamDeckImageForIcon(iconName string) (string, error) {
-	var result string = ""
+	var result string
 	var err error
 
 	result, ok := keyIconCache[iconName]
