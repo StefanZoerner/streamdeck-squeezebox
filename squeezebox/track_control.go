@@ -24,7 +24,8 @@ func ChangePlayerTrack(hostname string, cliPort int, playerID string, delta int)
 	cmd := fmt.Sprintf("%s playlist tracks ?", playerID)
 	resp, err := performCommand(con, cmd)
 	if err == nil {
-		s, err := getTokenFromResponseLineAndDecode(resp, 3)
+		var s string
+		s, err = getTokenFromResponseLineAndDecode(resp, 3)
 		if err == nil {
 			trackCount, err = strconv.Atoi(s)
 		}
@@ -67,7 +68,7 @@ func ChangePlayerTrack(hostname string, cliPort int, playerID string, delta int)
 func getTrackIndexConn(con net.Conn, playerID string) (int, error) {
 
 	var trackIndex = 0
-	var err error = nil
+	var err error
 
 	cmd := fmt.Sprintf("%s playlist index ?", playerID)
 	resp, err := performCommand(con, cmd)

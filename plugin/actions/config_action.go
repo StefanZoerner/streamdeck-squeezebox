@@ -68,8 +68,6 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 
 		err := squeezebox.CheckConnectionCLI(conProps)
 		if err != nil {
-			client.ShowAlert(ctx)
-
 			msgPayload := ConfigurationMessage{
 				Type:    "caution",
 				Summary: "Failed.",
@@ -77,15 +75,16 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 			}
 			client.SendToPropertyInspector(ctx, msgPayload)
 
+			_ = client.ShowAlert(ctx)
 		} else {
-			client.ShowOk(ctx)
-
 			msgPayload := ConfigurationMessage{
 				Type:    "info",
 				Summary: "Success.",
 				Content: "Connection to Logitech Media Server successfully establiished.",
 			}
 			client.SendToPropertyInspector(ctx, msgPayload)
+
+			_ = client.ShowOk(ctx)
 		}
 	}
 

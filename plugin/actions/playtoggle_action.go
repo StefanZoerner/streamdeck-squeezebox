@@ -54,7 +54,7 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 		}
 
 		if settings.PlayerId == "" {
-			client.ShowAlert(ctx)
+			_ = client.ShowAlert(ctx)
 			err = errors.New("no player configured")
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -63,7 +63,7 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 		gs := general.GetPluginGlobalSettings()
 		mode, err := squeezebox.TogglePlayerMode(gs.ConnectionProps(), settings.PlayerId)
 		if err != nil {
-			client.ShowAlert(ctx)
+			_ = client.ShowAlert(ctx)
 		} else {
 			err = setImageForPlayMode(ctx, client, mode)
 		}

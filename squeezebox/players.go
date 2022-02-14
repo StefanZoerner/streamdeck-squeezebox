@@ -20,7 +20,7 @@ func GetPlayerInfos(cp ConnectionProperties) ([]PlayerInfo, error) {
 	}
 	defer con.Close()
 
-	cmd := fmt.Sprintf("player count ?")
+	cmd := "player count ?"
 	s, err := performCommand(con, cmd)
 	if err != nil {
 		return nil, err

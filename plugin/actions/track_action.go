@@ -149,18 +149,19 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 
 func trackSetKeyImage(ctx context.Context, client *streamdeck.Client, direction string) error {
 	var err error
+	var iconName string
 
 	switch direction {
 	case TrackNext:
-		image, err := keyimages.GetStreamDeckImageForIcon("track_next")
-		if err == nil {
-			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
-		}
+		iconName = "track_next"
 	case TrackPrev:
-		image, err := keyimages.GetStreamDeckImageForIcon("track_prev")
-		if err == nil {
-			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
-		}
+		iconName = "track_prev"
+	}
+
+	var image string
+	image, err = keyimages.GetStreamDeckImageForIcon(iconName)
+	if err == nil {
+		err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 	}
 
 	return err
