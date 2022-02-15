@@ -174,18 +174,19 @@ func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, e
 
 func volumeSetKeyImage(ctx context.Context, client *streamdeck.Client, kind string) error {
 	var err error
+	var iconName string
 
 	switch kind {
 	case VolumeUp:
-		image, err := keyimages.GetStreamDeckImageForIcon("volume_up")
-		if err == nil {
-			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
-		}
+		iconName = "volume_up"
 	case VolumeDown:
-		image, err := keyimages.GetStreamDeckImageForIcon("volume_down")
-		if err == nil {
-			err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
-		}
+		iconName = "volume_down"
+	}
+
+	var image string
+	image, err = keyimages.GetStreamDeckImageForIcon(iconName)
+	if err == nil {
+		err = client.SetImage(ctx, image, streamdeck.HardwareAndSoftware)
 	}
 
 	return err

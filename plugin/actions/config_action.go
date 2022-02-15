@@ -24,7 +24,6 @@ type ConfigurationMessage struct {
 }
 
 func SetupConfigurationAction(client *streamdeck.Client) {
-
 	configureaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.configure")
 	configureaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 	configureaction.RegisterHandler(streamdeck.SendToPlugin, configHanderSendToPlugin)
