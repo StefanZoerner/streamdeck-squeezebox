@@ -77,8 +77,10 @@ func getSettingsFromKeydownEvent(event streamdeck.Event, settings interface{}) e
 func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	payload := streamdeck.WillAppearPayload{}
-	err := json.Unmarshal(event.Payload, &payload)
+	err = json.Unmarshal(event.Payload, &payload)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
 		return err
@@ -86,36 +88,30 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 
 	settings := trackActionSettings{}
 	err = json.Unmarshal(payload.Settings, &settings)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
-	}
-
-	var modified bool
-	if settings.PlayerId == "" {
-		settings.PlayerName = "(None)"
-		modified = true
-	}
-	if settings.Direction == "" {
-		settings.Direction = TrackNext
-		modified = true
-	}
-
-	if modified {
-		err = client.SetSettings(ctx, settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+	if err == nil {
+		var modified bool
+		if settings.PlayerId == "" {
+			settings.PlayerName = "(None)"
+			modified = true
+		}
+		if settings.Direction == "" {
+			settings.Direction = TrackNext
+			modified = true
+		}
+		if modified {
+			err = client.SetSettings(ctx, settings)
 		}
 	}
 
-	err = trackSetKeyImage(ctx, client, settings.Direction)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
+	if err == nil {
+		err = trackSetKeyImage(ctx, client, settings.Direction)
 	}
 
-	return nil
+	if err != nil {
+		general.LogErrorWithEvent(client, event, err)
+	}
+
+	return err
 }
 
 func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
