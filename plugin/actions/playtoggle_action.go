@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/general"
 	"github.com/StefanZoerner/streamdeck-squeezebox/plugin/keyimages"
 	"github.com/StefanZoerner/streamdeck-squeezebox/squeezebox"
@@ -193,7 +192,7 @@ func setImageForPlayMode(ctx context.Context, client *streamdeck.Client, mode st
 	case "pause", "stop":
 		icon = "play"
 	default:
-		err = fmt.Errorf("unknown play mode: %s", mode)
+		icon = "play_pause"
 	}
 
 	if err == nil {

@@ -22,6 +22,7 @@ func init() {
 		"album_art",
 		"pause",
 		"play",
+		"play_pause",
 		"track_prev",
 		"track_next",
 		"volume_up",
