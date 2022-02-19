@@ -91,17 +91,17 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 		return err
 	}
 
+	var modified bool
 	if settings.PlayerId == "" {
 		settings.PlayerName = "(None)"
-		err = client.SetSettings(ctx, settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
+		modified = true
 	}
-
 	if settings.Direction == "" {
 		settings.Direction = TrackNext
+		modified = true
+	}
+
+	if modified {
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
