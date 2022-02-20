@@ -88,20 +88,10 @@ func playtoggleHandlerWillAppear(ctx context.Context, client *streamdeck.Client,
 		return err
 	}
 
+	// TODO: Change for Default Player
 	if settings.PlayerId == "" {
 		general.LogErrorWithEvent(client, event, errors.New("no player configured"))
 		return err
-	}
-
-	gs := general.GetPluginGlobalSettings()
-	status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-	} else {
-		err = setImageForPlayMode(ctx, client, status)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-		}
 	}
 
 	pmo := playModeObserver{
@@ -109,6 +99,20 @@ func playtoggleHandlerWillAppear(ctx context.Context, client *streamdeck.Client,
 		ctx:    ctx,
 	}
 	general.AddOberserverForPlayer(settings.PlayerId, pmo)
+
+	gs := general.GetPluginGlobalSettings()
+	conProps := gs.ConnectionProps()
+	if conProps.NotEmpty() {
+		status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
+		if err != nil {
+			general.LogErrorWithEvent(client, event, err)
+		} else {
+			err = setImageForPlayMode(ctx, client, status)
+			if err != nil {
+				general.LogErrorWithEvent(client, event, err)
+			}
+		}
+	}
 
 	return nil
 }
