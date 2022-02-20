@@ -29,37 +29,9 @@ func SetupTrackAction(client *streamdeck.Client) {
 	trackAction := client.Action("de.szoerner.streamdeck.squeezebox.actions.track")
 	trackAction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 
-	trackAction.RegisterHandler(streamdeck.KeyDown, func(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
-		general.LogEvent(client, event)
-
-		settings := trackActionSettings{}
-		err := getSettingsFromKeydownEvent(event, &settings)
-		if err == nil {
-			if settings.PlayerId == "" {
-				_ = client.ShowAlert(ctx)
-				err = errors.New("no player configured")
-			} else {
-
-				globalSettings := general.GetPluginGlobalSettings()
-				delta := 0
-				if settings.Direction == TrackPrev {
-					delta = -1
-				} else if settings.Direction == TrackNext {
-					delta = +1
-				}
-				if delta != 0 {
-					_, _, err := squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CLIPort, settings.PlayerId, delta)
-					if err != nil {
-						_ = client.ShowAlert(ctx)
-					}
-				}
-			}
-		}
-
-		return err
-	})
-	trackAction.RegisterHandler(streamdeck.WillAppear, trackActionWillAppear)
-	trackAction.RegisterHandler(streamdeck.SendToPlugin, trackSendToPlugin)
+	trackAction.RegisterHandler(streamdeck.WillAppear, trackHandlerWillAppear)
+	trackAction.RegisterHandler(streamdeck.KeyDown, trackHandlerKeyDown)
+	trackAction.RegisterHandler(streamdeck.SendToPlugin, trackHandlerSendToPlugin)
 }
 
 func getSettingsFromKeydownEvent(event streamdeck.Event, settings interface{}) error {
@@ -74,7 +46,39 @@ func getSettingsFromKeydownEvent(event streamdeck.Event, settings interface{}) e
 	return err
 }
 
-func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func trackHandlerKeyDown(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	general.LogEvent(client, event)
+
+	var err error
+
+	settings := trackActionSettings{}
+	err = getSettingsFromKeydownEvent(event, &settings)
+	if err == nil {
+		if settings.PlayerId == "" {
+			_ = client.ShowAlert(ctx)
+			err = errors.New("no player configured")
+		} else {
+
+			globalSettings := general.GetPluginGlobalSettings()
+			delta := 0
+			if settings.Direction == TrackPrev {
+				delta = -1
+			} else if settings.Direction == TrackNext {
+				delta = +1
+			}
+			if delta != 0 {
+				_, _, err = squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CLIPort, settings.PlayerId, delta)
+				if err != nil {
+					_ = client.ShowAlert(ctx)
+				}
+			}
+		}
+	}
+
+	return err
+}
+
+func trackHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	var err error
@@ -104,7 +108,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 	}
 
 	if err == nil {
-		err = trackSetKeyImage(ctx, client, settings.Direction)
+		err = setTrackKeyImage(ctx, client, settings.Direction)
 	}
 
 	if err != nil {
@@ -114,7 +118,7 @@ func trackActionWillAppear(ctx context.Context, client *streamdeck.Client, event
 	return err
 }
 
-func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func trackHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
 	var err error
@@ -131,7 +135,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 		} else if fromPI.Command == "sendFormData" {
 			err = client.SetSettings(ctx, fromPI.Settings)
 			if err == nil {
-				err = trackSetKeyImage(ctx, client, fromPI.Settings.Direction)
+				err = setTrackKeyImage(ctx, client, fromPI.Settings.Direction)
 			}
 		}
 	}
@@ -143,7 +147,7 @@ func trackSendToPlugin(ctx context.Context, client *streamdeck.Client, event str
 	return err
 }
 
-func trackSetKeyImage(ctx context.Context, client *streamdeck.Client, direction string) error {
+func setTrackKeyImage(ctx context.Context, client *streamdeck.Client, direction string) error {
 	var err error
 	var iconName string
 
