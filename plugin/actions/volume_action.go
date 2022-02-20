@@ -90,45 +90,39 @@ func displayNumberInKey(ctx context.Context, client *streamdeck.Client, n int, v
 func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
 	general.LogEvent(client, event)
 
+	var err error
+
 	payload := streamdeck.WillAppearPayload{}
-	err := json.Unmarshal(event.Payload, &payload)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
-	}
+	err = json.Unmarshal(event.Payload, &payload)
+	if err == nil {
 
-	settings := VolumeActionSettings{}
-	err = json.Unmarshal(payload.Settings, &settings)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
-	}
+		settings := VolumeActionSettings{}
+		err = json.Unmarshal(payload.Settings, &settings)
+		if err == nil {
 
-	if settings.PlayerId == "" {
-		settings.PlayerName = "(None)"
-		err = client.SetSettings(ctx, settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+			var modified bool
+			if settings.PlayerId == "" && settings.PlayerName != "(None)" {
+				settings.PlayerName = "(None)"
+				modified = true
+			}
+			if settings.Kind == "" {
+				settings.Kind = VolumeUp
+				modified = true
+			}
+			if modified {
+				err = client.SetSettings(ctx, settings)
+			}
+
+			if err == nil {
+				err = volumeSetKeyImage(ctx, client, settings.Kind)
+			}
 		}
 	}
 
-	if settings.Kind == "" {
-		settings.Kind = VolumeUp
-		err = client.SetSettings(ctx, settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-	}
-
-	err = volumeSetKeyImage(ctx, client, settings.Kind)
 	if err != nil {
 		general.LogErrorWithEvent(client, event, err)
-		return err
 	}
-
-	return nil
+	return err
 }
 
 func volumeHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
