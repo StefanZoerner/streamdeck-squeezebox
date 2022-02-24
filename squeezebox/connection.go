@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"strings"
 )
 
@@ -41,6 +42,22 @@ func CheckConnectionCLI(cp ConnectionProperties) error {
 
 	if !strings.HasPrefix(result, "version") {
 		return errors.New("unexpected response from server")
+	}
+
+	return nil
+}
+
+func CheckConnectionHTTP(cp ConnectionProperties) error {
+
+	url := fmt.Sprintf("http://%s:%d/", cp.Hostname, cp.HTTPPort)
+	res, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP error code %d, %s", res.StatusCode, res.Status)
 	}
 
 	return nil

@@ -27,6 +27,8 @@ func SetupConfigurationAction(client *streamdeck.Client) {
 	configureaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.configure")
 	configureaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
 	configureaction.RegisterHandler(streamdeck.SendToPlugin, configHanderSendToPlugin)
+	configureaction.RegisterHandler(streamdeck.KeyDown, configHanderKeyDown)
+
 }
 
 func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
@@ -69,22 +71,62 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 		if err != nil {
 			msgPayload := ConfigurationMessage{
 				Type:    "caution",
-				Summary: "Failed.",
+				Summary: "CLI Failed.",
 				Content: err.Error(),
 			}
 			client.SendToPropertyInspector(ctx, msgPayload)
 
 			_ = client.ShowAlert(ctx)
-		} else {
+			return err
+		}
+
+		errHttp := squeezebox.CheckConnectionHTTP(conProps)
+		if errHttp != nil {
 			msgPayload := ConfigurationMessage{
-				Type:    "info",
-				Summary: "Success.",
-				Content: "Connection to Logitech Media Server successfully establiished.",
+				Type:    "caution",
+				Summary: "HTTP Failed.",
+				Content: errHttp.Error(),
 			}
 			client.SendToPropertyInspector(ctx, msgPayload)
 
-			_ = client.ShowOk(ctx)
+			_ = client.ShowAlert(ctx)
+			return err
 		}
+
+		msgPayload := ConfigurationMessage{
+			Type:    "info",
+			Summary: "Success.",
+			Content: "Connection to Logitech Media Server successfully establiished.",
+		}
+		client.SendToPropertyInspector(ctx, msgPayload)
+
+		_ = client.ShowOk(ctx)
+	}
+
+	return nil
+}
+
+func configHanderKeyDown(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+	general.LogEvent(client, event)
+
+	ok := true
+
+	conProps := general.GetPluginGlobalSettings().ConnectionProps()
+
+	err := squeezebox.CheckConnectionHTTP(conProps)
+	if err != nil {
+		ok = false
+	} else {
+		err = squeezebox.CheckConnectionCLI(conProps)
+		if err != nil {
+			ok = false
+		}
+	}
+
+	if ok {
+		_ = client.ShowOk(ctx)
+	} else {
+		_ = client.ShowAlert(ctx)
 	}
 
 	return nil
