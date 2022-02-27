@@ -30,10 +30,17 @@
         </div>
 
         <div class="sdpi-item">
+            <div class="sdpi-item-label">Default Player</div>
+            <select class="sdpi-item-value select"
+                    id="default_player_select">
+            </select>
+        </div>
+
+        <div class="sdpi-item">
             <div class="sdpi-item-label"></div>
             <button class="sdpi-item-value"
                     id="store_button"
-                    onclick="sendToPlugin('setConnection')">OK</button>
+                    onclick="sendToPlugin('setConnection')">Save</button>
             <button class="sdpi-item-value"
                     id="reset_button"
                     onclick="getGlobalSettings()">Reset</button>
@@ -46,9 +53,7 @@
                 <p id="message_content"></p>
             </details>
         </div>
-
-
-
+        
         <div class="sdpi-item">
             <div class="sdpi-item-label">Information</div>
             <input class="sdpi-item-value" id="debug_info" value="" readonly >
@@ -63,9 +68,8 @@
             uuid = null,
             actionInfo = {},
 
-            hostname = "",
-            cli_port = "",
-            http_port = ""
+            default_player_id = "",
+            default_player_name = ""
         ;
 
         function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
@@ -101,15 +105,75 @@
                     document.getElementById('hostname').value = settings.hostname;
                     document.getElementById('cli_port').value = settings.cli_port;
                     document.getElementById('http_port').value = settings.http_port;
+                    document.getElementById('default_player_select').value = settings.default_player_id;
 
+                    default_player_id = settings.default_player_id;
+                    default_player_name = settings.default_player_name;
 
                 } else if (event === 'sendToPropertyInspector') {
+
                     let payload = jsonObj['payload'];
-                    showMessage(payload.type, payload.summary, payload.content)
+                    if (payload.players == null) {
+                        showMessage(payload.type, payload.summary, payload.content)
+                    } else {
+                        // display players
+                        const playerSelect = document.getElementById('default_player_select')
+
+                        // Remove all options from selection
+                        let i, L = playerSelect.options.length - 1;
+                        for (i = L; i >= 0; i--) {
+                            playerSelect.remove(i);
+                        }
+
+                        // add current value as first option in the selection
+                        let selectedOption = document.createElement("option");
+                        selectedOption.text = default_player_name
+                        selectedOption.value = default_player_id
+                        playerSelect.add(selectedOption)
+
+
+                        // add all available players as options
+                        let players = payload.players;
+                        for (player of players) {
+                            if (player.player_id != default_player_id) {
+                                let option = document.createElement("option");
+                                option.text = player.player_name
+                                option.value = player.player_id
+                                playerSelect.add(option)
+                            } else {
+                                selectedOption.text = player.player_name
+                                default_player_name = player.player_name
+                            }
+                        }
+
+                    }
                 }
+
             };
 
+            setTimeout(function (){
+                pluginRequestGetPlayerSelectionOptions();
+            }, 500);
+
         }
+
+
+        function pluginRequestGetPlayerSelectionOptions() {
+            if (websocket) {
+                const payload = {
+                    "command": "getPlayerSelectionOptions",
+                    "settings": {}
+                }
+
+                websocket.send(JSON.stringify({
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": payload
+                }));
+            }
+        }
+
 
         function sendToPlugin(command) {
             if (websocket) {
@@ -117,12 +181,15 @@
                 const hostname = document.getElementById('hostname').value;
                 const cli_port = document.getElementById('cli_port').value;
                 const http_port = document.getElementById('http_port').value;
+                const select = document.getElementById('default_player_select');
 
                 const payload = {
                     "command": command,
                     "hostname": hostname,
                     "cli_port": cli_port,
-                    "http_port": http_port
+                    "http_port": http_port,
+                    "default_player_id": select.value,
+                    "default_player_name": select.options[select.options.selectedIndex].text
                 };
 
                 websocket.send(JSON.stringify({

@@ -11,9 +11,11 @@ import (
 // PluginGlobalSettings is stored as a Singleton
 
 type PluginGlobalSettings struct {
-	Hostname string `json:"hostname"`
-	CLIPort  int    `json:"cli_port"`
-	HTTPPort int    `json:"http_port"`
+	Hostname          string `json:"hostname"`
+	CLIPort           int    `json:"cli_port"`
+	HTTPPort          int    `json:"http_port"`
+	DefaultPlayerID   string `json:"default_player_id"`
+	DefaultPlayerName string `json:"default_player_name"`
 }
 
 var instance *PluginGlobalSettings
@@ -22,9 +24,11 @@ func init() {
 	instance = &PluginGlobalSettings{
 
 		// Default values
-		Hostname: "",
-		CLIPort:  9090,
-		HTTPPort: 9000,
+		Hostname:          "",
+		CLIPort:           9090,
+		HTTPPort:          9000,
+		DefaultPlayerID:   "",
+		DefaultPlayerName: "",
 	}
 }
 
@@ -65,6 +69,8 @@ func DidReceiveGlobalSettingsHandler(ctx context.Context, client *streamdeck.Cli
 	serverSettings.Hostname = settingsFromPayload.Hostname
 	serverSettings.CLIPort = settingsFromPayload.CLIPort
 	serverSettings.HTTPPort = settingsFromPayload.HTTPPort
+	serverSettings.DefaultPlayerID = settingsFromPayload.DefaultPlayerID
+	serverSettings.DefaultPlayerName = settingsFromPayload.DefaultPlayerName
 
 	return nil
 }

@@ -11,10 +11,12 @@ import (
 )
 
 type ConfigurationDataFromPI struct {
-	Command  string `json:"command"`
-	Hostname string `json:"hostname"`
-	CliPort  string `json:"cli_port"`
-	HttpPort string `json:"http_port"`
+	Command           string `json:"command"`
+	Hostname          string `json:"hostname"`
+	CliPort           string `json:"cli_port"`
+	HttpPort          string `json:"http_port"`
+	DefaultPlayerID   string `json:"default_player_id"`
+	DefaultPlayerName string `json:"default_player_name"`
 }
 
 type ConfigurationMessage struct {
@@ -46,6 +48,8 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 		newGlobalSettings.Hostname = fromPI.Hostname
 		newGlobalSettings.CLIPort, _ = strconv.Atoi(fromPI.CliPort)
 		newGlobalSettings.HTTPPort, _ = strconv.Atoi(fromPI.HttpPort)
+		newGlobalSettings.DefaultPlayerID = fromPI.DefaultPlayerID
+		newGlobalSettings.DefaultPlayerName = fromPI.DefaultPlayerName
 
 		globalCtx := sdcontext.WithContext(context.Background(), general.PluginUUID)
 		if err := client.SetGlobalSettings(globalCtx, newGlobalSettings); err != nil {
@@ -53,7 +57,7 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 			return err
 		}
 
-		// Enforce Reload of Global S3ttings via an Event
+		// Enforce Reload of Global Settings via an Event
 		if err := client.GetGlobalSettings(globalCtx); err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -101,6 +105,13 @@ func configHanderSendToPlugin(ctx context.Context, client *streamdeck.Client, ev
 		client.SendToPropertyInspector(ctx, msgPayload)
 
 		_ = client.ShowOk(ctx)
+	} else if fromPI.Command == "getPlayerSelectionOptions" {
+		var payload PlayerSelection
+
+		payload, err := getPlayerSelection()
+		if err == nil {
+			err = client.SendToPropertyInspector(ctx, &payload)
+		}
 	}
 
 	return nil
