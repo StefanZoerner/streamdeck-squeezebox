@@ -81,7 +81,7 @@ func albumartHandlerWillAppear(ctx context.Context, client *streamdeck.Client, e
 	modified := false
 
 	if settings.PlayerId == "" {
-		settings.PlayerName = "(None)"
+		settings.PlayerName = "(Default)"
 		modified = true
 	}
 	if settings.Dimension == "" {
@@ -113,7 +113,13 @@ func albumartHandlerWillAppear(ctx context.Context, client *streamdeck.Client, e
 
 	var url string
 	if conProps.NotEmpty() {
-		url, err = squeezebox.GetCurrentArtworkURL(conProps, settings.PlayerId)
+
+		pid := settings.PlayerId
+		if pid == "" {
+			pid = general.GetPluginGlobalSettings().DefaultPlayerID
+		}
+
+		url, err = squeezebox.GetCurrentArtworkURL(conProps, pid)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)
 			return err
@@ -182,7 +188,12 @@ func albumartHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client,
 			var url string
 			cp := general.GetPluginGlobalSettings().ConnectionProps()
 
-			url, err = squeezebox.GetCurrentArtworkURL(cp, fromPI.Settings.PlayerId)
+			pid := fromPI.Settings.PlayerId
+			if pid == "" {
+				pid = general.GetPluginGlobalSettings().DefaultPlayerID
+			}
+
+			url, err = squeezebox.GetCurrentArtworkURL(cp, pid)
 			if err == nil {
 				err = showAlbumArtImage(ctx, client, url, fromPI.Settings.Dimension, fromPI.Settings.TileNumber)
 			}

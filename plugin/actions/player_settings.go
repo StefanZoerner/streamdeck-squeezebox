@@ -63,7 +63,7 @@ func SelectPlayerHandlerWillAppear(ctx context.Context, client *streamdeck.Clien
 	}
 
 	if settings.PlayerId == "" {
-		settings.PlayerName = "(None)"
+		settings.PlayerName = "(Default)"
 		err = client.SetSettings(ctx, settings)
 		if err != nil {
 			general.LogErrorWithEvent(client, event, err)

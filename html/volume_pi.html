@@ -67,10 +67,6 @@
             option.value = player_id;
             playerSelect.add(option);
 
-            if (player_id === "") {
-                showMessage("info", "Select a player for this action.");
-            }
-
             const kindSelect = document.getElementById('volume_kind_select');
             kindSelect.value = volume_kind;
 
@@ -109,6 +105,14 @@
                     selectedOption.value = player_id
                     htmlSelect.add(selectedOption)
 
+                    // add Default player as an option, if not selected
+                    if (player_id !== "") {
+                        let defaultOption = document.createElement("option");
+                        defaultOption.text = "(Default)"
+                        defaultOption.value = ""
+                        htmlSelect.add(defaultOption)
+                    }
+
                     // add all available players as options
                     var players = payload.players;
                     for (player of players) {
@@ -121,6 +125,7 @@
                             selectedOption.text = player.player_name
                         }
                     }
+
 
                     if (players.length == 0) {
                         showMessage("caution", "No players available.", "")

@@ -132,6 +132,14 @@
                     selectedOption.value = player_id
                     htmlSelect.add(selectedOption)
 
+                    // add Default player as an option, if not selected
+                    if (player_id !== "") {
+                        let defaultOption = document.createElement("option");
+                        defaultOption.text = "(Default)"
+                        defaultOption.value = ""
+                        htmlSelect.add(defaultOption)
+                    }
+
                     // add all available players as options
                     let players = payload.players;
                     for (player of players) {

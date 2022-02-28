@@ -38,8 +38,6 @@ func (pmo playModeObserver) String() string {
 //
 func SetupPlaytoggleAction(client *streamdeck.Client) {
 
-	// Play Toggle
-	//
 	playtoggleaction := client.Action("de.szoerner.streamdeck.squeezebox.actions.playtoggle")
 
 	playtoggleaction.RegisterHandler(streamdeck.WillAppear, general.WillAppearRequestGlobalSettingsHandler)
@@ -52,15 +50,18 @@ func SetupPlaytoggleAction(client *streamdeck.Client) {
 			return err
 		}
 
-		if settings.PlayerId == "" {
-			_ = client.ShowAlert(ctx)
-			err = errors.New("no player configured")
-			general.LogErrorWithEvent(client, event, err)
-			return err
+		playerID := settings.PlayerId
+		globalSettings := general.GetPluginGlobalSettings()
+		if playerID == "" {
+			playerID = globalSettings.DefaultPlayerID
 		}
 
-		gs := general.GetPluginGlobalSettings()
-		mode, err := squeezebox.TogglePlayerMode(gs.ConnectionProps(), settings.PlayerId)
+		if playerID == "" {
+			_ = client.ShowAlert(ctx)
+			return errors.New("No player configured")
+		}
+
+		mode, err := squeezebox.TogglePlayerMode(globalSettings.ConnectionProps(), playerID)
 		if err != nil {
 			_ = client.ShowAlert(ctx)
 		} else {
@@ -88,12 +89,6 @@ func playtoggleHandlerWillAppear(ctx context.Context, client *streamdeck.Client,
 		return err
 	}
 
-	// TODO: Change for Default Player
-	if settings.PlayerId == "" {
-		general.LogErrorWithEvent(client, event, errors.New("no player configured"))
-		return err
-	}
-
 	pmo := playModeObserver{
 		client: client,
 		ctx:    ctx,
@@ -103,13 +98,22 @@ func playtoggleHandlerWillAppear(ctx context.Context, client *streamdeck.Client,
 	gs := general.GetPluginGlobalSettings()
 	conProps := gs.ConnectionProps()
 	if conProps.NotEmpty() {
-		status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), settings.PlayerId)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-		} else {
-			err = setImageForPlayMode(ctx, client, status)
+
+		pid := settings.PlayerId
+		if pid == "" {
+			pid = gs.DefaultPlayerID
+		}
+
+		if pid != "" {
+
+			status, err := squeezebox.GetPlayerMode(gs.ConnectionProps(), pid)
 			if err != nil {
 				general.LogErrorWithEvent(client, event, err)
+			} else {
+				err = setImageForPlayMode(ctx, client, status)
+				if err != nil {
+					general.LogErrorWithEvent(client, event, err)
+				}
 			}
 		}
 	}

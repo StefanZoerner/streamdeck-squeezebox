@@ -103,6 +103,14 @@
                         htmlSelect.remove(i);
                     }
 
+                    // add Default player as an option, if not selected
+                    if (player_id !== "") {
+                        let defaultOption = document.createElement("option");
+                        defaultOption.text = "(Default)"
+                        defaultOption.value = ""
+                        htmlSelect.add(defaultOption)
+                    }
+
                     // add current value as first option in the selection
                     let selectedOption = document.createElement("option");
                     selectedOption.text = player_name

@@ -36,26 +36,31 @@ func SetupVolumeAction(client *streamdeck.Client) {
 		settings := VolumeActionSettings{}
 		err := getSettingsFromKeydownEvent(event, &settings)
 		if err == nil {
-			if settings.PlayerId == "" {
-				_ = client.ShowAlert(ctx)
-				err = errors.New("no player configured")
-			} else {
 
-				delta := 0
-				if settings.Kind == VolumeDown {
-					delta = -10
-				} else if settings.Kind == VolumeUp {
-					delta = +10
-				}
-				if delta != 0 {
-					globalSettings := general.GetPluginGlobalSettings()
-					cp := globalSettings.ConnectionProps()
-					volume, err := squeezebox.ChangePlayerVolume(cp, settings.PlayerId, delta)
-					if err != nil {
-						_ = client.ShowAlert(ctx)
-					} else {
-						go displayNumberInKey(ctx, client, volume, settings.Kind)
-					}
+			playerID := settings.PlayerId
+			globalSettings := general.GetPluginGlobalSettings()
+			if playerID == "" {
+				playerID = globalSettings.DefaultPlayerID
+			}
+
+			if playerID == "" {
+				_ = client.ShowAlert(ctx)
+				return errors.New("No player configured")
+			}
+
+			delta := 0
+			if settings.Kind == VolumeDown {
+				delta = -10
+			} else if settings.Kind == VolumeUp {
+				delta = +10
+			}
+			if delta != 0 {
+				cp := globalSettings.ConnectionProps()
+				volume, err := squeezebox.ChangePlayerVolume(cp, playerID, delta)
+				if err != nil {
+					_ = client.ShowAlert(ctx)
+				} else {
+					go displayNumberInKey(ctx, client, volume, settings.Kind)
 				}
 			}
 		}
@@ -101,8 +106,8 @@ func volumeHandlerWillAppear(ctx context.Context, client *streamdeck.Client, eve
 		if err == nil {
 
 			var modified bool
-			if settings.PlayerId == "" && settings.PlayerName != "(None)" {
-				settings.PlayerName = "(None)"
+			if settings.PlayerId == "" && settings.PlayerName != "(Default)" {
+				settings.PlayerName = "(Default)"
 				modified = true
 			}
 			if settings.Kind == "" {

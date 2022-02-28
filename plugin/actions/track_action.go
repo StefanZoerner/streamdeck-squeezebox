@@ -54,25 +54,31 @@ func trackHandlerKeyDown(ctx context.Context, client *streamdeck.Client, event s
 	settings := trackActionSettings{}
 	err = getSettingsFromKeydownEvent(event, &settings)
 	if err == nil {
-		if settings.PlayerId == "" {
-			_ = client.ShowAlert(ctx)
-			err = errors.New("no player configured")
-		} else {
 
-			globalSettings := general.GetPluginGlobalSettings()
-			delta := 0
-			if settings.Direction == TrackPrev {
-				delta = -1
-			} else if settings.Direction == TrackNext {
-				delta = +1
-			}
-			if delta != 0 {
-				_, _, err = squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CLIPort, settings.PlayerId, delta)
-				if err != nil {
-					_ = client.ShowAlert(ctx)
-				}
+		playerID := settings.PlayerId
+		globalSettings := general.GetPluginGlobalSettings()
+		if playerID == "" {
+			playerID = globalSettings.DefaultPlayerID
+		}
+
+		if playerID == "" {
+			_ = client.ShowAlert(ctx)
+			return errors.New("No player configured")
+		}
+
+		delta := 0
+		if settings.Direction == TrackPrev {
+			delta = -1
+		} else if settings.Direction == TrackNext {
+			delta = +1
+		}
+		if delta != 0 {
+			_, _, err = squeezebox.ChangePlayerTrack(globalSettings.Hostname, globalSettings.CLIPort, playerID, delta)
+			if err != nil {
+				_ = client.ShowAlert(ctx)
 			}
 		}
+
 	}
 
 	return err
@@ -95,7 +101,7 @@ func trackHandlerWillAppear(ctx context.Context, client *streamdeck.Client, even
 	if err == nil {
 		var modified bool
 		if settings.PlayerId == "" {
-			settings.PlayerName = "(None)"
+			settings.PlayerName = "(Default)"
 			modified = true
 		}
 		if settings.Direction == "" {
