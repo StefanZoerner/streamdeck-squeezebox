@@ -59,76 +59,73 @@ func SetupAlbumArtAction(client *streamdeck.Client) {
 	albumArtAction.RegisterHandler(streamdeck.WillDisappear, albumartHandlerWillDisappear)
 }
 
-func albumartHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) error {
+func albumartHandlerWillAppear(ctx context.Context, client *streamdeck.Client, event streamdeck.Event) (err error) {
 	general.LogEvent(client, event)
 
-	var err error
+	defer func() {
+		if err != nil {
+			general.LogErrorWithEvent(client, event, err)
+		}
+	}()
 
 	payload := streamdeck.WillAppearPayload{}
 	err = json.Unmarshal(event.Payload, &payload)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
-	}
 
-	settings := albumArtActionSettings{}
-	err = json.Unmarshal(payload.Settings, &settings)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-		return err
-	}
+	if err == nil {
+		settings := albumArtActionSettings{}
+		err = json.Unmarshal(payload.Settings, &settings)
 
-	modified := false
+		if err == nil {
 
-	if settings.PlayerId == "" {
-		settings.PlayerName = "(Default)"
-		modified = true
-	}
-	if settings.Dimension == "" {
-		settings.Dimension = keyimages.AlbumArt1x1
-		modified = true
-	}
-	if settings.TileNumber == 0 {
-		settings.TileNumber = 1
-		modified = true
-	}
+			modified := false
+			if settings.PlayerId == "" {
+				settings.PlayerName = "(Default)"
+				modified = true
+			}
+			if settings.Dimension == "" {
+				settings.Dimension = keyimages.AlbumArt1x1
+				modified = true
+			}
+			if settings.TileNumber == 0 {
+				settings.TileNumber = 1
+				modified = true
+			}
 
-	if modified {
-		err = client.SetSettings(ctx, settings)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
+			if modified {
+				err = client.SetSettings(ctx, settings)
+				if err != nil {
+					return err
+				}
+			}
+
+			aao := albumArtObserver{
+				client:    client,
+				ctx:       ctx,
+				dimension: settings.Dimension,
+				tile:      settings.TileNumber,
+			}
+			general.AddOberserverForPlayer(settings.PlayerId, aao)
+
+			conProps := general.GetPluginGlobalSettings().ConnectionProps()
+
+			var url string
+			if conProps.NotEmpty() {
+
+				pid := settings.PlayerId
+				if pid == "" {
+					pid = general.GetPluginGlobalSettings().DefaultPlayerID
+				}
+
+				if pid != "" {
+					url, err = squeezebox.GetCurrentArtworkURL(conProps, pid)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			err = showAlbumArtImage(ctx, client, url, settings.Dimension, settings.TileNumber)
 		}
-	}
-
-	aao := albumArtObserver{
-		client:    client,
-		ctx:       ctx,
-		dimension: settings.Dimension,
-		tile:      settings.TileNumber,
-	}
-	general.AddOberserverForPlayer(settings.PlayerId, aao)
-
-	conProps := general.GetPluginGlobalSettings().ConnectionProps()
-
-	var url string
-	if conProps.NotEmpty() {
-
-		pid := settings.PlayerId
-		if pid == "" {
-			pid = general.GetPluginGlobalSettings().DefaultPlayerID
-		}
-
-		url, err = squeezebox.GetCurrentArtworkURL(conProps, pid)
-		if err != nil {
-			general.LogErrorWithEvent(client, event, err)
-			return err
-		}
-	}
-
-	err = showAlbumArtImage(ctx, client, url, settings.Dimension, settings.TileNumber)
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
 	}
 
 	return err
@@ -200,9 +197,6 @@ func albumartHandlerSendToPlugin(ctx context.Context, client *streamdeck.Client,
 		}
 	}
 
-	if err != nil {
-		general.LogErrorWithEvent(client, event, err)
-	}
 	return err
 }
 
