@@ -11,7 +11,7 @@ fmt:
 	go fmt ./...
 
 .PHONY:build
-build: fmt macexecutable
+build: fmt macexecutable windowsexecutable
 
 windowsexecutable:
 	GOOS=windows GOARCH=amd64 go build -o streamdeck-squeezebox.exe
@@ -29,6 +29,7 @@ sdplugin: build
 	cp -r assets $(SDPLUGINDIR)
 	cp -r html $(SDPLUGINDIR)
 	cp streamdeck-squeezebox $(SDPLUGINDIR)
+	cp streamdeck-squeezebox.exe $(SDPLUGINDIR)
 
 uninstall:
 	rm -rf $(INSTALLDIR)/$(NAME).sdPlugin
@@ -36,3 +37,5 @@ uninstall:
 install: uninstall sdplugin
 	mv $(SDPLUGINDIR) $(INSTALLDIR)/$(NAME).sdPlugin
 
+distribute: sdplugin
+	DistributionTool -b -i $(SDPLUGINDIR) -o ~/Desktop/

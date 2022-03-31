@@ -9,20 +9,21 @@
   "CategoryIcon": "assets/images/Category",
   "Icon": "assets/images/Category",
 
-  "CodePath": "streamdeck-squeezebox",
-  "URL": "",
+  "CodePath": "streamdeck-squeezebox.exe",
+  "CodePathMac": "streamdeck-squeezebox",
+  "URL": "https://github.com/StefanZoerner/streamdeck-squeezebox",
 
   "Actions": [
     {
       "Name": "Configuration",
       "Tooltip": "Configure the connection to your LMS",
-      "Icon": "assets/images/actions/setup",
+      "Icon": "assets/images/actions/configure",
       "SupportedInMultiActions": false,
       "UUID": "de.szoerner.streamdeck.squeezebox.actions.configure",
       "PropertyInspectorPath": "html/configuration.html",
       "States": [
         {
-          "Image": "assets/images/ConfigureKey"
+          "Image": "assets/images/keys/configure"
         }
       ]
     },
@@ -83,6 +84,10 @@
     {
         "Platform": "mac",
         "MinimumVersion" : "10.11"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion" : "10"
     }
   ],
   "Software":
