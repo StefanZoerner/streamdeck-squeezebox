@@ -7,7 +7,7 @@ A simple Stream Deck plugin with actions to control your Squeezebox music player
 
 ## Overview
 
-The following image shows all actions in a profile. Most of them used mor than once.
+The following image shows all actions of this plugin in a profile. Most of the actions used more than once, especially the one for album art.
 
 ![All actions in a profile](docs/img/all_actions_in_profile.png)
 
@@ -18,7 +18,46 @@ The following image shows all actions in a profile. Most of them used mor than o
 * Show current album art
 * Configuration of streamdeck keys to control specific players
  
-## Requirements
-* Logitech Media Server (LMS) available via local network
-* CLI configured (this is active by default, the standard port is 9090, you can change this in the configuration)
+## How to use
 
+### Requirements
+* Logitech Media Server (LMS) available via local network
+* CLI configured on LMS (this is active by default, the standard port is 9090, you can change this in the plugin configuration)
+
+Theoretically, the plugin should work with STeamdeck both on Mac OS and Windows. However, I do not have a Windows 10 machine to test it. Feedback is therefore welcome.
+
+### Installation
+
+TODO 
+
+### Configuration
+
+The configuration is done via the corresponding action. Simply drag one into a profile. In the property inspector for the action can be set:
+
+* Hostname of your LMS (name or IP address)
+* CLI Port of the LMS (default is 9090)
+* HTTP Port of the LMS (default is 9000)
+
+The settings can be tested in the UI with a button. Later on, pressing the action key on the streamdeck also triggers the test and displays the result directly on the device.
+
+If the connection works you can configure a default player. This makes it easier to configure individual actions later.
+
+* Default Player
+
+The settings are saved globally for all actions. In particular, the plugin does not support multiple LMS (yet). 
+
+### Other Actions
+
+TODO
+
+#### Play Toggle
+
+#### Album Art
+
+#### Volume Control
+
+#### Skip title
+
+## Implementation details
+
+The plugin is written in Go and uses the [StreamDeck Plugin API bindings for Go](https://github.com/samwho/streamdeck) by Sam Who. Due to a missing feature for global settings, I use a copy in the vendoring directory.
