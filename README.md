@@ -24,13 +24,15 @@ The following image shows all actions of this plugin in a profile. Most of the a
 * Logitech Media Server (LMS) available via local network
 * CLI configured on LMS (this is active by default, the standard port is 9090, you can change this in the plugin configuration)
 
-Theoretically, the plugin should work with STeamdeck both on Mac OS and Windows. However, I do not have a Windows 10 machine to test it. Feedback is therefore welcome.
+Theoretically, the plugin should work with Steamdeck both on Mac OS and Windows. However, I do not have a Windows 10 machine to test it. Feedback is therefore welcome.
 
 ### Installation
 
 TODO 
 
 ### Configuration
+
+![Configure action icon](assets/images/actions/configure@2x.png)
 
 The configuration is done via the corresponding action. Simply drag one into a profile. In the property inspector for the action can be set:
 
@@ -48,15 +50,23 @@ The settings are saved globally for all actions. In particular, the plugin does 
 
 ### Other Actions
 
-TODO
+TODO: Better descriptions
 
-#### Play Toggle
+**Play/Pause Toggle**
 
-#### Album Art
+Toggle play mode for a player
 
-#### Volume Control
+**Album Art**
 
-#### Skip title
+Show the cover art of an album in a tile (1x1, 2x2 or 3x3 Streamdeck keys)
+
+**Volume Control**
+
+Change the volume of a player up or down
+
+**Change Track**
+
+Previous or next track in the playlist of a player
 
 ## Implementation details
 
