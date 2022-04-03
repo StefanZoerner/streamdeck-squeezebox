@@ -28,7 +28,13 @@ Theoretically, the plugin should work with Steamdeck both on Mac OS and Windows.
 
 ### Installation
 
-TODO 
+Download the current ...streamDeckPlugin file from the releases. 
+You install it by a double click on your Windows or macOS machine hosting the STream Deck application.
+
+The plugin and its action appear in the toolbar in the  "Squeezbox" group, see image below.
+
+![All actions in the toolbar](docs/img/actions_in_toolbar.png)
+        
 
 ### Configuration
 
@@ -50,21 +56,28 @@ The settings are saved globally for all actions. In particular, the plugin does 
 
 ### Other Actions
 
-TODO: Better descriptions
-
 **Play/Pause Toggle**
+
+![play toggle action icon](assets/images/actions/play_toggle@2x.png)
 
 Toggle play mode for a player
 
 **Album Art**
 
+![play toggle action icon](assets/images/actions/album_art@2x.png)
+
 Show the cover art of an album in a tile (1x1, 2x2 or 3x3 Streamdeck keys)
 
 **Volume Control**
 
+![play toggle action icon](assets/images/actions/volume@2x.png)
+
 Change the volume of a player up or down
 
 **Change Track**
+
+![play toggle action icon](assets/images/actions/track@2x.png)
+
 
 Previous or next track in the playlist of a player
 
